@@ -19,6 +19,7 @@ const eslintConfig = [
   ...compat.extends("next/core-web-vitals", "next/typescript"),
   js.configs.recommended,
   ...tseslint.configs.strict,
+  ...tseslint.configs.strictTypeChecked,
   {
     ignores: [
       "node_modules/**",
@@ -29,21 +30,33 @@ const eslintConfig = [
     ],
   },
   {
+    languageOptions: {
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: __dirname,
+      },
+    },
     plugins: {
+      tseslint,
       react,
       "react-hooks": reactHooks,
-      "react-compiler": reactCompiler,
       "react-refresh": reactRefresh,
+      "react-compiler": reactCompiler,
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
-      ...react.configs.recommended.rules,
-      ...react.configs["jsx-runtime"].rules,
-      "react-compiler/react-compiler": "error",
       "react-refresh/only-export-components": [
         "warn",
         { allowConstantExport: true },
       ],
+      "react-compiler/react-compiler": "error",
+      ...react.configs.recommended.rules,
+      ...react.configs["jsx-runtime"].rules,
+    },
+    settings: {
+      react: {
+        version: "detect", // Automatically detect React version
+      },
     },
   },
 ];
