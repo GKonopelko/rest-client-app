@@ -3,18 +3,24 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import styles from './header.module.css';
-import { Button, Space } from 'antd';
-import { LoginOutlined, UserAddOutlined } from '@ant-design/icons';
+import { Button, Space, Grid } from 'antd';
+import {
+  LoginOutlined,
+  UserAddOutlined,
+  GlobalOutlined,
+} from '@ant-design/icons';
+
+const { useBreakpoint } = Grid;
 
 export default function Header() {
   const [currentLanguage, setCurrentLanguage] = useState('en');
   const [isScrolled, setIsScrolled] = useState(false);
+  const screens = useBreakpoint();
 
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
     };
-
     window.addEventListener('scroll', handleScroll);
     return () => {
       window.removeEventListener('scroll', handleScroll);
@@ -23,46 +29,42 @@ export default function Header() {
 
   const handleLanguageChange = (language: string) => {
     setCurrentLanguage(language);
-    console.log('Language changed to:', language);
   };
+
+  const showText = !screens.xs;
 
   return (
     <header
       className={`${styles.header} ${isScrolled ? styles.scrolled : ''}`}
       role="banner"
-      aria-label="Main header"
     >
       <Link href="/" className={styles.logoLink}>
-        <svg
-          width="200"
-          height="60"
-          viewBox="0 0 220 60"
-          xmlns="http://www.w3.org/2000/svg"
-          className={styles.logoSvg}
-        >
+        <svg width="180" height="60" viewBox="0 0 200 60">
           <text x="5" y="35" fontSize="24" fontWeight="700" fill="#10B981">
             REST SPB
           </text>
         </svg>
       </Link>
 
-      <Space>
+      <div className={styles.container}>
         <Space.Compact>
           <Button
             type={currentLanguage === 'en' ? 'primary' : 'default'}
             onClick={() => {
               handleLanguageChange('en');
             }}
+            icon={!showText ? <GlobalOutlined /> : undefined}
           >
-            EN
+            {showText ? 'EN' : ''}
           </Button>
           <Button
             type={currentLanguage === 'ru' ? 'primary' : 'default'}
             onClick={() => {
               handleLanguageChange('ru');
             }}
+            icon={!showText ? <GlobalOutlined /> : undefined}
           >
-            RU
+            {showText ? 'RU' : ''}
           </Button>
         </Space.Compact>
 
@@ -71,12 +73,12 @@ export default function Header() {
           icon={<LoginOutlined />}
           className={styles.signInButton}
         >
-          Sign In
+          {showText ? 'Sign In' : ''}
         </Button>
         <Button type="primary" icon={<UserAddOutlined />}>
-          Sign Up
+          {showText ? 'Sign Up' : ''}
         </Button>
-      </Space>
+      </div>
     </header>
   );
 }

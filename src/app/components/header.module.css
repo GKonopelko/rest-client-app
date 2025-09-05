@@ -72,3 +72,8 @@
     height: 40px;
   }
 }
+
+.container {
+  display: flex;
+  gap: 1rem;
+}
