@@ -8,7 +8,7 @@ import { Metadata } from 'next';
 import { AntdRegistry } from '@ant-design/nextjs-registry';
 import { routing } from '../../i18n/routing';
 import StoreProvider from './StoreProvider';
-import AppLayout from '@/components/AppLayout';
+import AppLayout from '@/components/AppLayout/AppLayout';
 
 export const metadata: Metadata = {
   title: 'Rest SPB',

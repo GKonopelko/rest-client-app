@@ -2,15 +2,15 @@
 
 import React, { useState, useCallback } from 'react';
 import Link from 'next/link';
-import styles from './header.module.css';
+import styles from './Header.module.css';
 import { Button, Space, Grid } from 'antd';
 import {
   LoginOutlined,
   UserAddOutlined,
   GlobalOutlined,
 } from '@ant-design/icons';
-import { Logo } from '@/components/Logo';
-import { useScrollDetection } from '../hooks/useScrollDetection';
+import { Logo } from '@/components/Logo/Logo';
+import { useScrollDetection } from '../../hooks/useScrollDetection';
 
 const { useBreakpoint } = Grid;
 

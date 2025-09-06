@@ -1,9 +1,9 @@
 'use client';
 
-import styles from './appLayout.module.css';
+import styles from './AppLayout.module.css';
 import React from 'react';
-import Footer from './Footer';
-import Header from './Header';
+import Footer from '../Footer/Footer';
+import Header from '../Header/Header';
 
 interface AppLayoutProps {
   children: React.ReactNode;
