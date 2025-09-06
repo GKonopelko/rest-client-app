@@ -20,7 +20,6 @@ const eslintConfig = [
   ...compat.extends('next/core-web-vitals', 'next/typescript'),
   js.configs.recommended,
   ...tseslint.configs.strict,
-  ...tseslint.configs.strictTypeChecked,
   eslintPluginPrettier,
   {
     ignores: [
@@ -48,13 +47,10 @@ const eslintConfig = [
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
-      'react-refresh/only-export-components': [
-        'warn',
-        { allowConstantExport: true },
-      ],
       'react-compiler/react-compiler': 'error',
       ...react.configs.recommended.rules,
       ...react.configs['jsx-runtime'].rules,
+      'react-refresh/only-export-components': 'off',
     },
     settings: {
       react: {

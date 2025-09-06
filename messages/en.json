@@ -1,0 +1,12 @@
+{
+  "AppLayout": {
+    "signInButton": "Sign In",
+    "signUpButton": "Sign Up"
+  },
+  "MainPage": {},
+  "SignInPage": {},
+  "SignUpPage": {},
+  "RestClientPage": {},
+  "History": {},
+  "Variables": {}
+}

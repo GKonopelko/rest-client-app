@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "prod": "next start",
     "lint": "eslint",
     "format:fix": "prettier --write .",
     "prepare": "husky",
@@ -15,10 +15,13 @@
   "dependencies": {
     "@ant-design/nextjs-registry": "^1.1.0",
     "@ant-design/v5-patch-for-react-19": "^1.0.3",
+    "@reduxjs/toolkit": "^2.9.0",
     "antd": "^5.27.2",
-    "next": "15.5.2",
+    "next": "^15.5.2",
+    "next-intl": "^4.3.6",
     "react": "19.1.0",
-    "react-dom": "19.1.0"
+    "react-dom": "19.1.0",
+    "react-redux": "^9.2.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
