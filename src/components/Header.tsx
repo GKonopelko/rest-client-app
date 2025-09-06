@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import Link from 'next/link';
 import styles from './header.module.css';
 import { Button, Space, Grid } from 'antd';
@@ -9,27 +9,28 @@ import {
   UserAddOutlined,
   GlobalOutlined,
 } from '@ant-design/icons';
+import { Logo } from '@/components/Logo';
+import { useScrollDetection } from '../hooks/useScrollDetection';
 
 const { useBreakpoint } = Grid;
 
+const LANGUAGES = {
+  EN: 'en',
+  RU: 'ru',
+} as const;
+
+type Language = (typeof LANGUAGES)[keyof typeof LANGUAGES];
+
 export default function Header() {
-  const [currentLanguage, setCurrentLanguage] = useState('en');
-  const [isScrolled, setIsScrolled] = useState(false);
+  const [currentLanguage, setCurrentLanguage] = useState<Language>(
+    LANGUAGES.EN
+  );
   const screens = useBreakpoint();
+  const isScrolled = useScrollDetection(10);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, []);
-
-  const handleLanguageChange = (language: string) => {
+  const handleLanguageChange = useCallback((language: Language) => {
     setCurrentLanguage(language);
-  };
+  }, []);
 
   const showText = !screens.xs;
 
@@ -39,30 +40,28 @@ export default function Header() {
       role="banner"
     >
       <Link href="/" className={styles.logoLink}>
-        <svg width="180" height="60" viewBox="0 0 200 60">
-          <text x="5" y="35" fontSize="24" fontWeight="700" fill="#10B981">
-            REST SPB
-          </text>
-        </svg>
+        <Logo />
       </Link>
 
       <div className={styles.container}>
         <Space.Compact>
           <Button
-            type={currentLanguage === 'en' ? 'primary' : 'default'}
+            type={currentLanguage === LANGUAGES.EN ? 'primary' : 'default'}
             onClick={() => {
-              handleLanguageChange('en');
+              handleLanguageChange(LANGUAGES.EN);
             }}
             icon={!showText ? <GlobalOutlined /> : undefined}
+            aria-label="English"
           >
             {showText ? 'EN' : ''}
           </Button>
           <Button
-            type={currentLanguage === 'ru' ? 'primary' : 'default'}
+            type={currentLanguage === LANGUAGES.RU ? 'primary' : 'default'}
             onClick={() => {
-              handleLanguageChange('ru');
+              handleLanguageChange(LANGUAGES.RU);
             }}
             icon={!showText ? <GlobalOutlined /> : undefined}
+            aria-label="Russian"
           >
             {showText ? 'RU' : ''}
           </Button>
@@ -71,11 +70,12 @@ export default function Header() {
         <Button
           type="default"
           icon={<LoginOutlined />}
+          aria-label="Sign In"
           className={styles.signInButton}
         >
           {showText ? 'Sign In' : ''}
         </Button>
-        <Button type="primary" icon={<UserAddOutlined />}>
+        <Button type="primary" icon={<UserAddOutlined />} aria-label="Sign Up">
           {showText ? 'Sign Up' : ''}
         </Button>
       </div>

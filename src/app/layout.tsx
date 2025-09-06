@@ -1,7 +1,7 @@
 import './globals.css';
 import '@ant-design/v5-patch-for-react-19';
 import { AntdRegistry } from '@ant-design/nextjs-registry';
-import AppLayout from './components/AppLayout';
+import AppLayout from '../components/AppLayout';
 
 export default function RootLayout({
   children,
