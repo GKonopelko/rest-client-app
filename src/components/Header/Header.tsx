@@ -67,17 +67,25 @@ export default function Header() {
           </Button>
         </Space.Compact>
 
-        <Button
-          type="default"
-          icon={<LoginOutlined />}
-          aria-label="Sign In"
-          className={styles.signInButton}
-        >
-          {showText ? 'Sign In' : ''}
-        </Button>
-        <Button type="primary" icon={<UserAddOutlined />} aria-label="Sign Up">
-          {showText ? 'Sign Up' : ''}
-        </Button>
+        <Link href="/sign-in" className={styles.logoLink}>
+          <Button
+            type="default"
+            icon={<LoginOutlined />}
+            aria-label="Sign In"
+            className={styles.signInButton}
+          >
+            {showText ? 'Sign In' : ''}
+          </Button>
+        </Link>
+        <Link href="/sign-up" className={styles.logoLink}>
+          <Button
+            type="primary"
+            icon={<UserAddOutlined />}
+            aria-label="Sign Up"
+          >
+            {showText ? 'Sign Up' : ''}
+          </Button>
+        </Link>
       </div>
     </header>
   );
