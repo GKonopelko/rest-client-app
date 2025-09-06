@@ -1,0 +1,26 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  position: relative;
+}
+
+.content {
+  flex: 1;
+  padding: 1rem;
+  overflow-y: auto;
+  padding-top: calc(80px + 1rem);
+}
+
+@media (max-width: 768px) {
+  .content {
+    padding-top: calc(70px + 1rem);
+  }
+}
+
+@media (max-width: 480px) {
+  .content {
+    padding-top: calc(60px + 0.5rem);
+    padding: 0.5rem;
+  }
+}
