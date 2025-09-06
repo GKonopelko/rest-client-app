@@ -1,4 +1,8 @@
 {
+  "AppLayout": {
+    "signInButton": "Вход",
+    "signUpButton": "Регистрация"
+  },
   "MainPage": {},
   "SignInPage": {},
   "SignUpPage": {},

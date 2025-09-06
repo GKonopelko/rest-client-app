@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import styles from './Header.module.css';
 import { Button, Space, Grid } from 'antd';
@@ -9,28 +9,35 @@ import {
   UserAddOutlined,
   GlobalOutlined,
 } from '@ant-design/icons';
-import { Logo } from '@/components/Logo/Logo';
+import { Logo } from '../../components/Logo/Logo';
 import { useScrollDetection } from '../../hooks/useScrollDetection';
+import { useTranslations } from 'next-intl';
+import { useParams, usePathname, useRouter } from 'next/navigation';
 
 const { useBreakpoint } = Grid;
 
 const LANGUAGES = {
-  EN: 'en',
-  RU: 'ru',
-} as const;
-
-type Language = (typeof LANGUAGES)[keyof typeof LANGUAGES];
+  en: 'en',
+  ru: 'ru',
+};
 
 export default function Header() {
-  const [currentLanguage, setCurrentLanguage] = useState<Language>(
-    LANGUAGES.EN
-  );
   const screens = useBreakpoint();
   const isScrolled = useScrollDetection(10);
+  const params = useParams();
+  const pathname = usePathname();
+  const router = useRouter();
+  const t = useTranslations('AppLayout');
+  const [currentLocale, setCurrentLocale] = useState(params?.locale || 'en');
 
-  const handleLanguageChange = useCallback((language: Language) => {
-    setCurrentLanguage(language);
-  }, []);
+  const switchLocale = () => {
+    const newLocale = currentLocale === 'en' ? 'ru' : 'en';
+    const newPath =
+      pathname?.replace(`/${currentLocale}`, `/${newLocale}`) || '';
+
+    router.push(newPath);
+    setCurrentLocale(newLocale);
+  };
 
   const showText = !screens.xs;
 
@@ -46,9 +53,9 @@ export default function Header() {
       <div className={styles.container}>
         <Space.Compact>
           <Button
-            type={currentLanguage === LANGUAGES.EN ? 'primary' : 'default'}
+            type={currentLocale === LANGUAGES.en ? 'primary' : 'default'}
             onClick={() => {
-              handleLanguageChange(LANGUAGES.EN);
+              switchLocale();
             }}
             icon={!showText ? <GlobalOutlined /> : undefined}
             aria-label="English"
@@ -56,9 +63,9 @@ export default function Header() {
             {showText ? 'EN' : ''}
           </Button>
           <Button
-            type={currentLanguage === LANGUAGES.RU ? 'primary' : 'default'}
+            type={currentLocale === LANGUAGES.ru ? 'primary' : 'default'}
             onClick={() => {
-              handleLanguageChange(LANGUAGES.RU);
+              switchLocale();
             }}
             icon={!showText ? <GlobalOutlined /> : undefined}
             aria-label="Russian"
@@ -71,19 +78,19 @@ export default function Header() {
           <Button
             type="default"
             icon={<LoginOutlined />}
-            aria-label="Sign In"
+            aria-label={t('signInButton')}
             className={styles.signInButton}
           >
-            {showText ? 'Sign In' : ''}
+            {showText ? t('signInButton') : ''}
           </Button>
         </Link>
         <Link href="/sign-up" className={styles.logoLink}>
           <Button
             type="primary"
             icon={<UserAddOutlined />}
-            aria-label="Sign Up"
+            aria-label={t('signUpButton')}
           >
-            {showText ? 'Sign Up' : ''}
+            {showText ? t('signUpButton') : ''}
           </Button>
         </Link>
       </div>
