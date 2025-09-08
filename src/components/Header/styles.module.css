@@ -11,6 +11,8 @@
   background-color: #000c17;
   padding: 0 20px;
   transition: all 0.3s ease;
+  transform: translateZ(0);
+  will-change: height, transform;
 }
 
 .header.scrolled {
