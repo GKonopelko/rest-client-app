@@ -5,7 +5,18 @@
     "localeRu": "Русский",
     "localeEn": "English"
   },
-  "MainPage": {},
+  "MainPage": {
+    "welcome": "Welcome!",
+    "welcomeDescription": "Sign in or create an account to start using our REST Client",
+    "welcomeBack": "Welcome Back, {name}!",
+    "welcomeBackDescription": "Continue working with your REST API requests",
+    "developersHeader": "Developers",
+    "developersDescription": "Our team consists of super-developers Aleksandr, Aleksey and Grigori",
+    "projectHeader": "Project",
+    "projectDescription": "REST Client is a powerful tool for testing APIs...",
+    "courseHeader": "Course",
+    "courseDescription": "This project was developed as part of the RS School React course. Here You can find more details."
+  },
   "SignInPage": {},
   "SignUpPage": {},
   "RestClientPage": {},
