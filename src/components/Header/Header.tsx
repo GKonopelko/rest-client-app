@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import styles from './Header.module.css';
+import styles from './styles.module.css';
 import { Button, Space, Grid } from 'antd';
 import {
   LoginOutlined,
@@ -52,19 +52,19 @@ export default function Header() {
             type={currentLocale === LANGUAGES.en ? 'primary' : 'default'}
             onClick={() => handleLocaleSwitch('en')}
             icon={!showText ? <GlobalOutlined /> : undefined}
-            aria-label="English"
+            aria-label={t('localeEn')}
             className={styles['locale-button']}
           >
-            {showText ? 'EN' : ''}
+            {showText ? t('localeEn') : ''}
           </Button>
           <Button
             type={currentLocale === LANGUAGES.ru ? 'primary' : 'default'}
             onClick={() => handleLocaleSwitch('ru')}
             icon={!showText ? <GlobalOutlined /> : undefined}
-            aria-label="Russian"
+            aria-label={t('localeRu')}
             className={styles['locale-button']}
           >
-            {showText ? 'RU' : ''}
+            {showText ? t('localeRu') : ''}
           </Button>
         </Space.Compact>
 
