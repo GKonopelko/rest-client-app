@@ -32,7 +32,15 @@
   transform: scaleY(0.95);
 }
 
-.signInButton {
+.header button {
+  min-width: 140px;
+}
+
+.locale-button {
+  min-width: 10px !important;
+}
+
+.sign-in-button {
   color: white;
   border-color: white;
   transition: all 0.3s ease;
@@ -56,6 +64,10 @@
   .logo-link svg {
     width: 150px;
     height: 50px;
+  }
+
+  .header button {
+    min-width: 20px;
   }
 }
 

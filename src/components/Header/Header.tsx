@@ -31,7 +31,7 @@ export default function Header() {
     typeof params?.locale === 'string' ? params.locale : 'en';
 
   const switchLocale = useSwitchLocale();
-  const showText = !screens.xs;
+  const showText = screens.md;
 
   const handleLocaleSwitch = (targetLocale: string) => {
     switchLocale(currentLocale, targetLocale);
@@ -53,6 +53,7 @@ export default function Header() {
             onClick={() => handleLocaleSwitch('en')}
             icon={!showText ? <GlobalOutlined /> : undefined}
             aria-label="English"
+            className={styles['locale-button']}
           >
             {showText ? 'EN' : ''}
           </Button>
@@ -61,6 +62,7 @@ export default function Header() {
             onClick={() => handleLocaleSwitch('ru')}
             icon={!showText ? <GlobalOutlined /> : undefined}
             aria-label="Russian"
+            className={styles['locale-button']}
           >
             {showText ? 'RU' : ''}
           </Button>
