@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from 'react';
 
-export const useScrollDetection = (threshold: number = 10): boolean => {
+export const useScrollDetection = (): boolean => {
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > threshold);
+      setIsScrolled(window.scrollY > 30);
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -17,7 +17,7 @@ export const useScrollDetection = (threshold: number = 10): boolean => {
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
-  }, [threshold]);
+  }, []);
 
   return isScrolled;
 };

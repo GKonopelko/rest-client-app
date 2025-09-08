@@ -19,7 +19,7 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
-.logoLink {
+.logo-link {
   display: flex;
   align-items: center;
   text-decoration: none;
@@ -27,8 +27,9 @@
   transition: transform 0.3s ease;
 }
 
-.header.scrolled .logoLink {
-  transform: scale(0.9);
+.header.scrolled .logo-link,
+.header.scrolled button {
+  transform: scaleY(0.95);
 }
 
 .signInButton {
@@ -37,7 +38,7 @@
   transition: all 0.3s ease;
 }
 
-.header.scrolled .signInButton {
+.header.scrolled .sign-in-button {
   color: #10b981;
   border-color: #10b981;
 }
@@ -52,7 +53,7 @@
     height: 50px;
   }
 
-  .logoLink svg {
+  .logo-link svg {
     width: 150px;
     height: 50px;
   }
@@ -67,7 +68,7 @@
     height: 45px;
   }
 
-  .logoLink svg {
+  .logo-link svg {
     width: 120px;
     height: 40px;
   }

@@ -1,6 +1,5 @@
 'use client';
 
-import React, { useState } from 'react';
 import Link from 'next/link';
 import styles from './Header.module.css';
 import { Button, Space, Grid } from 'antd';
@@ -12,7 +11,8 @@ import {
 import { Logo } from '../../components/Logo/Logo';
 import { useScrollDetection } from '../../hooks/useScrollDetection';
 import { useTranslations } from 'next-intl';
-import { useParams, usePathname, useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
+import { useSwitchLocale } from '@/hooks/useSwitchLocale';
 
 const { useBreakpoint } = Grid;
 
@@ -23,30 +23,26 @@ const LANGUAGES = {
 
 export default function Header() {
   const screens = useBreakpoint();
-  const isScrolled = useScrollDetection(10);
+  const isScrolled = useScrollDetection();
   const params = useParams();
-  const pathname = usePathname();
   const router = useRouter();
   const t = useTranslations('AppLayout');
-  const [currentLocale, setCurrentLocale] = useState(params?.locale || 'en');
+  const currentLocale =
+    typeof params?.locale === 'string' ? params.locale : 'en';
 
-  const switchLocale = () => {
-    const newLocale = currentLocale === 'en' ? 'ru' : 'en';
-    const newPath =
-      pathname?.replace(`/${currentLocale}`, `/${newLocale}`) || '';
-
-    router.push(newPath);
-    setCurrentLocale(newLocale);
-  };
-
+  const switchLocale = useSwitchLocale();
   const showText = !screens.xs;
+
+  const handleLocaleSwitch = (targetLocale: string) => {
+    switchLocale(currentLocale, targetLocale);
+  };
 
   return (
     <header
       className={`${styles.header} ${isScrolled ? styles.scrolled : ''}`}
       role="banner"
     >
-      <Link href="/" className={styles.logoLink}>
+      <Link href="/" className={styles['logo-link']}>
         <Logo />
       </Link>
 
@@ -54,9 +50,7 @@ export default function Header() {
         <Space.Compact>
           <Button
             type={currentLocale === LANGUAGES.en ? 'primary' : 'default'}
-            onClick={() => {
-              switchLocale();
-            }}
+            onClick={() => handleLocaleSwitch('en')}
             icon={!showText ? <GlobalOutlined /> : undefined}
             aria-label="English"
           >
@@ -64,9 +58,7 @@ export default function Header() {
           </Button>
           <Button
             type={currentLocale === LANGUAGES.ru ? 'primary' : 'default'}
-            onClick={() => {
-              switchLocale();
-            }}
+            onClick={() => handleLocaleSwitch('ru')}
             icon={!showText ? <GlobalOutlined /> : undefined}
             aria-label="Russian"
           >
@@ -74,25 +66,24 @@ export default function Header() {
           </Button>
         </Space.Compact>
 
-        <Link href="/sign-in" className={styles.logoLink}>
-          <Button
-            type="default"
-            icon={<LoginOutlined />}
-            aria-label={t('signInButton')}
-            className={styles.signInButton}
-          >
-            {showText ? t('signInButton') : ''}
-          </Button>
-        </Link>
-        <Link href="/sign-up" className={styles.logoLink}>
-          <Button
-            type="primary"
-            icon={<UserAddOutlined />}
-            aria-label={t('signUpButton')}
-          >
-            {showText ? t('signUpButton') : ''}
-          </Button>
-        </Link>
+        <Button
+          type="default"
+          icon={<LoginOutlined />}
+          aria-label={t('signInButton')}
+          className={styles['sign-in-button']}
+          onClick={() => router.push('/sign-in')}
+        >
+          {showText ? t('signInButton') : ''}
+        </Button>
+
+        <Button
+          type="primary"
+          icon={<UserAddOutlined />}
+          aria-label={t('signUpButton')}
+          onClick={() => router.push('/sign-up')}
+        >
+          {showText ? t('signUpButton') : ''}
+        </Button>
       </div>
     </header>
   );
