@@ -9,12 +9,12 @@
   flex: 1;
   padding: 1rem;
   overflow-y: auto;
-  padding-top: calc(80px + 1rem);
+  padding-top: 2rem;
 }
 
 @media (max-width: 768px) {
   .content {
-    padding-top: calc(70px + 1rem);
+    padding-top: 1.5rem;
   }
 }
 

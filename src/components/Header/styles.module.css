@@ -11,6 +11,8 @@
   background-color: #000c17;
   padding: 0 20px;
   transition: all 0.3s ease;
+  transform: translateZ(0);
+  will-change: height, transform;
 }
 
 .header.scrolled {
@@ -19,7 +21,7 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
-.logoLink {
+.logo-link {
   display: flex;
   align-items: center;
   text-decoration: none;
@@ -27,19 +29,17 @@
   transition: transform 0.3s ease;
 }
 
-.header.scrolled .logoLink {
-  transform: scale(0.9);
+.header.scrolled .logo-link,
+.header.scrolled button {
+  transform: scaleY(0.95);
 }
 
-.signInButton {
-  color: white;
-  border-color: white;
-  transition: all 0.3s ease;
+.header button {
+  min-width: 140px;
 }
 
-.header.scrolled .signInButton {
-  color: #10b981;
-  border-color: #10b981;
+.locale-button {
+  min-width: 90px !important;
 }
 
 @media (max-width: 768px) {
@@ -52,9 +52,16 @@
     height: 50px;
   }
 
-  .logoLink svg {
+  .logo-link svg {
     width: 150px;
     height: 50px;
+  }
+
+  .header button {
+    min-width: 20px;
+  }
+  .locale-button {
+    min-width: 20px !important;
   }
 }
 
@@ -67,7 +74,7 @@
     height: 45px;
   }
 
-  .logoLink svg {
+  .logo-link svg {
     width: 120px;
     height: 40px;
   }
