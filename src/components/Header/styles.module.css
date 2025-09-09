@@ -39,7 +39,7 @@
 }
 
 .locale-button {
-  min-width: 10px !important;
+  min-width: 90px !important;
 }
 
 @media (max-width: 768px) {
@@ -59,6 +59,9 @@
 
   .header button {
     min-width: 20px;
+  }
+  .locale-button {
+    min-width: 20px !important;
   }
 }
 
