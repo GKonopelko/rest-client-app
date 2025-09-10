@@ -40,6 +40,7 @@ export default function RestClientPage() {
   const router = useRouter();
 
   const onFinish = (data: RequestData) => {
+    const urlParts = pathname?.split('/');
     if (!urlParts) return;
     const base64String = encodeURIComponent(
       encodeBase64(JSON.stringify({ url: data.url }))
