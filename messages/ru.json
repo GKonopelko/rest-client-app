@@ -41,10 +41,11 @@
   "SignInPage": {},
   "SignUpPage": {},
   "RestClientPage": {
-    "title": "Протестируй свой запрос",
+    "title": "Протестируйте свой запрос",
     "request": "Запрос",
-    "url-placeholder": "Введи базовую ссылку",
-    "submitButton": "Отправить"
+    "urlPlaceholder": "Введите базовую ссылку",
+    "submitButton": "Отправить",
+    "inputError": "Пожалуйста, введите базовую ссылку!"
   },
   "History": {},
   "Variables": {}

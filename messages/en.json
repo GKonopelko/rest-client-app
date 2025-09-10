@@ -43,8 +43,9 @@
   "RestClientPage": {
     "title": "Test your request",
     "request": "Request",
-    "url-placeholder": "Enter your base URL",
-    "submitButton": "Submit"
+    "urlPlaceholder": "Enter your base URL",
+    "submitButton": "Submit",
+    "inputError": "Please enter your base link!"
   },
   "History": {},
   "Variables": {}

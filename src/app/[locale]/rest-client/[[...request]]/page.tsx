@@ -58,8 +58,12 @@ export default function RestClientPage() {
                 ))}
               </Select>
             </Form.Item>
-            <Form.Item className={styles['url-wrapper']}>
-              <Input placeholder={t('url-placeholder')} />
+            <Form.Item
+              name="url"
+              className={styles['url-wrapper']}
+              rules={[{ required: true, message: t('inputError') }]}
+            >
+              <Input placeholder={t('urlPlaceholder')} />
             </Form.Item>
             <Form.Item>
               <Button
