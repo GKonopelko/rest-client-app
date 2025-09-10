@@ -73,7 +73,7 @@ export default function Header() {
           icon={<LoginOutlined />}
           aria-label={t('signInButton')}
           className={styles['sign-in-button']}
-          onClick={() => router.push(`${currentLocale}/sign-in`)}
+          onClick={() => router.push(`/sign-in`)}
         >
           {showText ? t('signInButton') : ''}
         </Button>
@@ -82,7 +82,7 @@ export default function Header() {
           type="primary"
           icon={<UserAddOutlined />}
           aria-label={t('signUpButton')}
-          onClick={() => router.push(`${currentLocale}/sign-up`)}
+          onClick={() => router.push(`/sign-up`)}
         >
           {showText ? t('signUpButton') : ''}
         </Button>
