@@ -1,0 +1,40 @@
+.section {
+  display: flex;
+  width: 80vw;
+  margin: 0px auto;
+}
+
+.card {
+  width: 100%;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.title {
+  display: flex;
+  width: fit-content;
+  margin: 0px auto 30px auto;
+  color: #1890ff !important;
+}
+
+.form,
+.url-line {
+  width: 100%;
+}
+
+.url-line {
+  display: grid;
+  grid-template-columns: 120px 1fr 120px;
+}
+
+.select {
+  min-width: 120px;
+  border-top-right-radius: 0px;
+}
+
+.url-wrapper {
+  width: inherit;
+}
+
+.submit-button {
+  width: 120px;
+}
