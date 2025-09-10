@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import { Card, Typography, Space, Input, Button, Select, Form } from 'antd';
 import styles from './page.module.css';
@@ -35,14 +35,9 @@ const encodeBase64 = (str: string) => {
 
 export default function RestClientPage() {
   const pathname = usePathname();
-  const [method, setMethod] = useState('GET');
+  const [method, setMethod] = useState(pathname.split('/')[2] ?? 'GET');
   const t = useTranslations('RestClientPage');
   const router = useRouter();
-
-  useEffect(() => {
-    const urlParts = pathname.split('/');
-    if (urlParts[2] && urlParts[2] !== method) setMethod(urlParts[2]);
-  }, [pathname, method]);
 
   const onFinish = (data: RequestData) => {
     const base64String = encodeURIComponent(
