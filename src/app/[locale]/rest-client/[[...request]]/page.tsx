@@ -8,6 +8,7 @@ import { useTranslations } from 'next-intl';
 
 interface RequestData {
   method: string;
+  url: string;
 }
 const { Title } = Typography;
 const { Option } = Select;
@@ -23,6 +24,14 @@ const methods: string[] = [
   'TRACE',
 ];
 
+const encodeBase64 = (str: string) => {
+  if (typeof window !== 'undefined') {
+    return window.btoa(str);
+  } else {
+    return Buffer.from(str, 'utf-8').toString('base64');
+  }
+};
+
 export default function RestClientPage() {
   const pathname = usePathname();
   const urlParts = pathname?.split('/') ?? [];
@@ -33,10 +42,13 @@ export default function RestClientPage() {
 
   const onFinish = (data: RequestData) => {
     if (!urlParts) return;
+    const base64String = encodeURIComponent(
+      encodeBase64(JSON.stringify({ url: data.url }))
+    );
     if (urlParts.length >= 3) {
-      router?.push(`/${urlParts[2]}/${data.method}`);
+      router?.push(`/${urlParts[2]}/${data.method}/${base64String}`);
     } else {
-      router?.push(`${pathname}/${data.method}`);
+      router?.push(`${pathname}/${data.method}/${base64String}`);
     }
   };
 
