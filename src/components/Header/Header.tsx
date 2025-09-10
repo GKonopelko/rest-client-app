@@ -11,7 +11,8 @@ import {
 import { Logo } from '../../components/Logo/Logo';
 import { useScrollDetection } from '../../hooks/useScrollDetection';
 import { useTranslations } from 'next-intl';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
+import { useRouter } from '@/i18n/navigation';
 import { useSwitchLocale } from '@/hooks/useSwitchLocale';
 
 const { useBreakpoint } = Grid;
