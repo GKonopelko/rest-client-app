@@ -6,7 +6,12 @@
   "MainPage": {},
   "SignInPage": {},
   "SignUpPage": {},
-  "RestClientPage": {},
+  "RestClientPage": {
+    "title": "Протестируй свой запрос",
+    "request": "Запрос",
+    "url-placeholder": "Введи базовую ссылку",
+    "submitButton": "Отправить"
+  },
   "History": {},
   "Variables": {}
 }

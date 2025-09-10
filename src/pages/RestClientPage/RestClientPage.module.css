@@ -34,3 +34,7 @@
 .url-wrapper {
   width: inherit;
 }
+
+.submit-button {
+  width: 120px;
+}

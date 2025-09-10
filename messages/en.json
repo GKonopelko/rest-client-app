@@ -6,7 +6,12 @@
   "MainPage": {},
   "SignInPage": {},
   "SignUpPage": {},
-  "RestClientPage": {},
+  "RestClientPage": {
+    "title": "Test your request",
+    "request": "Request",
+    "url-placeholder": "Enter your base URL",
+    "submitButton": "Submit"
+  },
   "History": {},
   "Variables": {}
 }

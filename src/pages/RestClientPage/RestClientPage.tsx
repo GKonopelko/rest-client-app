@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { Card, Typography, Space, Input, Button, Select, Form } from 'antd';
 import styles from './RestClientPage.module.css';
+import { useTranslations } from 'next-intl';
 
 interface RequestData {
   method: string;
@@ -26,6 +27,7 @@ export default function RestClientPage() {
   const pathname = usePathname();
   const urlParts = pathname?.split('/') ?? [];
   const [method, _] = useState(urlParts[3] ?? 'GET');
+  const t = useTranslations('RestClientPage');
 
   const router = useRouter();
 
@@ -42,10 +44,10 @@ export default function RestClientPage() {
     <section className={styles.section}>
       <Card className={styles.card}>
         <Title level={2} className={styles.title}>
-          Test Your Request
+          {t('title')}
         </Title>
         <Form className={styles.form} onFinish={onFinish}>
-          <Title level={3}>Request</Title>
+          <Title level={3}>{t('request')}</Title>
           <Space.Compact className={styles['url-line']} size="large">
             <Form.Item name="method" initialValue={method}>
               <Select className={styles.select}>
@@ -57,11 +59,15 @@ export default function RestClientPage() {
               </Select>
             </Form.Item>
             <Form.Item className={styles['url-wrapper']}>
-              <Input placeholder="Enter base URL" />
+              <Input placeholder={t('url-placeholder')} />
             </Form.Item>
             <Form.Item>
-              <Button type="primary" htmlType="submit">
-                Submit
+              <Button
+                type="primary"
+                htmlType="submit"
+                className={styles['submit-button']}
+              >
+                {t('submitButton')}
               </Button>
             </Form.Item>
           </Space.Compact>
