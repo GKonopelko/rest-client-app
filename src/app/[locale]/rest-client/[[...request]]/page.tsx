@@ -34,10 +34,9 @@ const encodeBase64 = (str: string) => {
 
 export default function RestClientPage() {
   const pathname = usePathname();
-  const urlParts = pathname?.split('/') ?? [];
-  const [method, _] = useState(urlParts[3] ?? 'GET');
+  const urlParts = pathname?.split('/');
+  const [method, setMethod] = useState(urlParts?.[3] ?? 'GET');
   const t = useTranslations('RestClientPage');
-
   const router = useRouter();
 
   const onFinish = (data: RequestData) => {
@@ -62,7 +61,11 @@ export default function RestClientPage() {
           <Title level={3}>{t('request')}</Title>
           <Space.Compact className={styles['url-line']} size="large">
             <Form.Item name="method" initialValue={method}>
-              <Select className={styles.select}>
+              <Select
+                className={styles.select}
+                value={method}
+                onChange={setMethod}
+              >
                 {methods.map((elem) => (
                   <Option key={elem} value={elem}>
                     {elem}
