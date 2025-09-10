@@ -41,13 +41,16 @@ export default function RestClientPage() {
 
   const onFinish = (data: RequestData) => {
     const urlParts = pathname?.split('/');
+    console.log(pathname, urlParts);
     if (!urlParts) return;
     const base64String = encodeURIComponent(
       encodeBase64(JSON.stringify({ url: data.url }))
     );
     if (urlParts.length >= 3) {
+      console.log(1);
       router?.push(`/${urlParts[2]}/${data.method}/${base64String}`);
     } else {
+      console.log(2);
       router?.push(`${pathname}/${data.method}/${base64String}`);
     }
   };
