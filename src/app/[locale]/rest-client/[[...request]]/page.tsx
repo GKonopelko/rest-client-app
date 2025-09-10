@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { Card, Typography, Space, Input, Button, Select, Form } from 'antd';
 import styles from './page.module.css';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 
 interface RequestData {
   method: string;
@@ -34,25 +34,24 @@ const encodeBase64 = (str: string) => {
 
 export default function RestClientPage() {
   const pathname = usePathname();
+  const locale = useLocale();
   const urlParts = pathname?.split('/');
   const [method, setMethod] = useState(urlParts?.[3] ?? 'GET');
   const t = useTranslations('RestClientPage');
   const router = useRouter();
 
   const onFinish = (data: RequestData) => {
+    if (!pathname) return;
     const urlParts = pathname?.split('/');
     console.log(pathname, urlParts);
-    if (!urlParts) return;
+
     const base64String = encodeURIComponent(
       encodeBase64(JSON.stringify({ url: data.url }))
     );
-    if (urlParts.length >= 3) {
-      console.log(1);
-      router?.push(`/${urlParts[2]}/${data.method}/${base64String}`);
-    } else {
-      console.log(2);
-      router?.push(`${pathname}/${data.method}/${base64String}`);
-    }
+    const prefix = pathname.includes(locale)
+      ? '/rest-client'
+      : `${locale}/rest-client`;
+    router?.push(`${prefix}/${data.method}/${base64String}`);
   };
 
   return (
