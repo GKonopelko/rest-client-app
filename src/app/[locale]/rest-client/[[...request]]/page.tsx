@@ -33,9 +33,35 @@ const encodeBase64 = (str: string) => {
   }
 };
 
+const decodeBase64 = (str: string) => {
+  if (typeof window !== 'undefined') {
+    return JSON.parse(window.atob(decodeURIComponent(str)));
+  } else {
+    const utf8String = Buffer.from(decodeURIComponent(str), 'base64')
+      .toString('utf-8')
+      .trim();
+    return JSON.parse(utf8String);
+  }
+};
+
+const getUrlFromBase64 = (str: string) => {
+  const obj: unknown = decodeBase64(str);
+  if (
+    typeof obj === 'object' &&
+    obj &&
+    'url' in obj &&
+    typeof obj['url'] === 'string'
+  ) {
+    return obj['url'];
+  }
+};
+
 export default function RestClientPage() {
   const pathname = usePathname();
   const [method, setMethod] = useState(pathname.split('/')[2] ?? 'GET');
+  const [url, _] = useState<string | undefined>(
+    getUrlFromBase64(pathname.split('/')[3]) ?? undefined
+  );
   const t = useTranslations('RestClientPage');
   const router = useRouter();
 
@@ -79,6 +105,7 @@ export default function RestClientPage() {
             <Form.Item
               name="url"
               className={styles['url-wrapper']}
+              initialValue={url}
               rules={[{ required: true, message: t('inputError') }]}
             >
               <Input placeholder={t('urlPlaceholder')} />
