@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+
 import { Card, Typography, Space, Input, Button, Select, Form } from 'antd';
 import styles from './page.module.css';
-import { useLocale, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
+import { usePathname, useRouter } from '@/i18n/navigation';
 
 interface RequestData {
   method: string;
@@ -34,24 +35,28 @@ const encodeBase64 = (str: string) => {
 
 export default function RestClientPage() {
   const pathname = usePathname();
-  const locale = useLocale();
-  const urlParts = pathname?.split('/');
-  const [method, setMethod] = useState(urlParts?.[3] ?? 'GET');
+  const [method, setMethod] = useState('GET');
   const t = useTranslations('RestClientPage');
   const router = useRouter();
 
-  const onFinish = (data: RequestData) => {
-    if (!pathname) return;
-    const urlParts = pathname?.split('/');
-    console.log(pathname, urlParts);
+  useEffect(() => {
+    const urlParts = pathname.split('/');
+    if (urlParts[2] && urlParts[2] !== method) setMethod(urlParts[2]);
+  }, [pathname, method]);
 
+  const onFinish = (data: RequestData) => {
     const base64String = encodeURIComponent(
       encodeBase64(JSON.stringify({ url: data.url }))
     );
-    const prefix = pathname.includes(locale)
-      ? '/rest-client'
-      : `${locale}/rest-client`;
-    router?.push(`${prefix}/${data.method}/${base64String}`);
+
+    const urlParts = pathname.split('/') || [];
+    const basePathIndex = urlParts.indexOf('rest-client');
+    const basePath =
+      basePathIndex !== -1
+        ? '/' + urlParts.slice(1, basePathIndex + 1).join('/')
+        : '/rest-client';
+
+    router.push(`${basePath}/${data.method}/${base64String}`);
   };
 
   return (
