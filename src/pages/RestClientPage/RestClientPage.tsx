@@ -1,6 +1,6 @@
 'use client';
 
-import { Card, Typography, Space, Input, Button, Select } from 'antd';
+import { Card, Typography, Space, Input, Button, Select, Form } from 'antd';
 import styles from './RestClientPage.module.css';
 
 const { Title } = Typography;
@@ -24,17 +24,26 @@ export default function RestClientPage() {
         <Title level={2} className={styles.title}>
           Test Your Request
         </Title>
-        <Space.Compact className={styles['url-line']} size="large">
-          <Select className={styles.select} defaultValue="GET">
-            {methods.map((elem) => (
-              <Option key={elem} value={elem}>
-                {elem}
-              </Option>
-            ))}
-          </Select>
-          <Input placeholder="Enter base URL" />
-          <Button type="primary">Submit</Button>
-        </Space.Compact>
+        <Form className={styles.form}>
+          <Title level={3}>Request</Title>
+          <Space.Compact className={styles['url-line']} size="large">
+            <Form.Item>
+              <Select className={styles.select} defaultValue="GET">
+                {methods.map((elem) => (
+                  <Option key={elem} value={elem}>
+                    {elem}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
+            <Form.Item className={styles['url-wrapper']}>
+              <Input placeholder="Enter base URL" />
+            </Form.Item>
+            <Form.Item>
+              <Button type="primary">Submit</Button>
+            </Form.Item>
+          </Space.Compact>
+        </Form>
       </Card>
     </section>
   );
