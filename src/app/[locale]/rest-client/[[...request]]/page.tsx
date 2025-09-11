@@ -1,13 +1,15 @@
 'use client';
 
 import { useState } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
+
 import { Card, Typography, Space, Input, Button, Select, Form } from 'antd';
 import styles from './page.module.css';
 import { useTranslations } from 'next-intl';
+import { usePathname, useRouter } from '@/i18n/navigation';
 
 interface RequestData {
   method: string;
+  url: string;
 }
 const { Title } = Typography;
 const { Option } = Select;
@@ -23,21 +25,59 @@ const methods: string[] = [
   'TRACE',
 ];
 
+const encodeBase64 = (str: string) => {
+  if (typeof window !== 'undefined') {
+    return window.btoa(str);
+  } else {
+    return Buffer.from(str, 'utf-8').toString('base64');
+  }
+};
+
+const decodeBase64 = (str: string) => {
+  if (typeof window !== 'undefined') {
+    return JSON.parse(window.atob(decodeURIComponent(str)));
+  } else {
+    const utf8String = Buffer.from(decodeURIComponent(str), 'base64')
+      .toString('utf-8')
+      .trim();
+    return JSON.parse(utf8String);
+  }
+};
+
+const getUrlFromBase64 = (str: string) => {
+  const obj: unknown = decodeBase64(str);
+  if (
+    typeof obj === 'object' &&
+    obj &&
+    'url' in obj &&
+    typeof obj['url'] === 'string'
+  ) {
+    return obj['url'];
+  }
+};
+
 export default function RestClientPage() {
   const pathname = usePathname();
-  const urlParts = pathname?.split('/') ?? [];
-  const [method, _] = useState(urlParts[3] ?? 'GET');
+  const [method, setMethod] = useState(pathname.split('/')[2] ?? 'GET');
+  const [url, _] = useState<string | undefined>(
+    getUrlFromBase64(pathname.split('/')[3]) ?? undefined
+  );
   const t = useTranslations('RestClientPage');
-
   const router = useRouter();
 
   const onFinish = (data: RequestData) => {
-    if (!urlParts) return;
-    if (urlParts.length >= 3) {
-      router?.push(`/${urlParts[2]}/${data.method}`);
-    } else {
-      router?.push(`${pathname}/${data.method}`);
-    }
+    const base64String = encodeURIComponent(
+      encodeBase64(JSON.stringify({ url: data.url }))
+    );
+
+    const urlParts = pathname.split('/') || [];
+    const basePathIndex = urlParts.indexOf('rest-client');
+    const basePath =
+      basePathIndex !== -1
+        ? '/' + urlParts.slice(1, basePathIndex + 1).join('/')
+        : '/rest-client';
+
+    router.push(`${basePath}/${data.method}/${base64String}`);
   };
 
   return (
@@ -50,7 +90,11 @@ export default function RestClientPage() {
           <Title level={3}>{t('request')}</Title>
           <Space.Compact className={styles['url-line']} size="large">
             <Form.Item name="method" initialValue={method}>
-              <Select className={styles.select}>
+              <Select
+                className={styles.select}
+                value={method}
+                onChange={setMethod}
+              >
                 {methods.map((elem) => (
                   <Option key={elem} value={elem}>
                     {elem}
@@ -58,8 +102,13 @@ export default function RestClientPage() {
                 ))}
               </Select>
             </Form.Item>
-            <Form.Item className={styles['url-wrapper']}>
-              <Input placeholder={t('url-placeholder')} />
+            <Form.Item
+              name="url"
+              className={styles['url-wrapper']}
+              initialValue={url}
+              rules={[{ required: true, message: t('inputError') }]}
+            >
+              <Input placeholder={t('urlPlaceholder')} />
             </Form.Item>
             <Form.Item>
               <Button

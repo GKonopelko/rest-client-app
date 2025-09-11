@@ -11,7 +11,8 @@ import {
 import { Logo } from '../../components/Logo/Logo';
 import { useScrollDetection } from '../../hooks/useScrollDetection';
 import { useTranslations } from 'next-intl';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
+import { useRouter } from '@/i18n/navigation';
 import { useSwitchLocale } from '@/hooks/useSwitchLocale';
 
 const { useBreakpoint } = Grid;
@@ -73,7 +74,7 @@ export default function Header() {
           icon={<LoginOutlined />}
           aria-label={t('signInButton')}
           className={styles['sign-in-button']}
-          onClick={() => router.push('/sign-in')}
+          onClick={() => router.push(`/sign-in`)}
         >
           {showText ? t('signInButton') : ''}
         </Button>
@@ -82,7 +83,7 @@ export default function Header() {
           type="primary"
           icon={<UserAddOutlined />}
           aria-label={t('signUpButton')}
-          onClick={() => router.push('/sign-up')}
+          onClick={() => router.push(`/sign-up`)}
         >
           {showText ? t('signUpButton') : ''}
         </Button>
