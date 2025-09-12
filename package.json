@@ -17,6 +17,7 @@
     "@ant-design/v5-patch-for-react-19": "^1.0.3",
     "@reduxjs/toolkit": "^2.9.0",
     "antd": "^5.27.2",
+    "firebase": "^12.2.1",
     "next": "^15.5.2",
     "next-intl": "^4.3.6",
     "react": "19.1.0",
