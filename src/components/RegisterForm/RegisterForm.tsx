@@ -6,11 +6,18 @@ import { Button, Form, Input } from 'antd';
 import { useForm, Controller } from 'react-hook-form';
 import { useDispatch } from 'react-redux';
 import { app } from '@/lib/firebase/firebase';
-import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  updateProfile,
+} from 'firebase/auth';
+import { FirebaseError } from 'firebase/app';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { registerSchema } from '@/lib/zod/registerChema';
+import { useRouter } from 'next/navigation';
 
 type FormValues = {
+  name: string;
   email: string;
   password: string;
   confirmPassword: string;
@@ -18,13 +25,15 @@ type FormValues = {
 
 export const RegisterForm = () => {
   const dispatch = useDispatch();
-
+  const router = useRouter();
   const {
     control,
     handleSubmit,
+    setError,
     formState: { errors, isValid },
   } = useForm<FormValues>({
     defaultValues: {
+      name: '',
       email: '',
       password: '',
       confirmPassword: '',
@@ -43,17 +52,32 @@ export const RegisterForm = () => {
         data.password
       );
 
+      await updateProfile(user, { displayName: data.name });
+
       const token = await user.getIdToken();
 
       dispatch(
         setUser({
+          name: user.displayName || '',
           email: user.email || '',
           id: user.uid,
           token: token,
         })
       );
+
+      router.push('/');
     } catch (error) {
-      console.error(error);
+      const err = error as FirebaseError;
+
+      if (err.code === 'auth/email-already-in-use') {
+        setError('email', {
+          type: 'manual',
+          message: 'Такой email уже зарегистрирован',
+        });
+        return;
+      }
+
+      console.log(error);
     }
   };
 
@@ -63,6 +87,18 @@ export const RegisterForm = () => {
       className={styles.form}
       onFinish={handleSubmit(submit)}
     >
+      <Form.Item
+        label={<span className={styles.label}>Name</span>}
+        validateStatus={errors.name ? 'error' : ''}
+        help={errors.name?.message}
+      >
+        <Controller
+          name="name"
+          control={control}
+          render={({ field }) => <Input placeholder="Enter name" {...field} />}
+        />
+      </Form.Item>
+
       <Form.Item
         label={<span className={styles.label}>Email</span>}
         validateStatus={errors.email ? 'error' : ''}

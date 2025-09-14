@@ -6,9 +6,10 @@ import { Button, Form, Input } from 'antd';
 import { useForm, Controller } from 'react-hook-form';
 import { useDispatch } from 'react-redux';
 import { app } from '@/lib/firebase/firebase';
-import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
+import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { loginSchema } from '@/lib/zod/loginSchema';
+import { useRouter } from 'next/navigation';
 
 type FormValues = {
   email: string;
@@ -17,7 +18,7 @@ type FormValues = {
 
 export const LoginForm = () => {
   const dispatch = useDispatch();
-
+  const router = useRouter();
   const {
     control,
     handleSubmit,
@@ -33,26 +34,24 @@ export const LoginForm = () => {
 
   const submit = async (data: FormValues) => {
     const fireAuth = getAuth(app);
+    const { user } = await signInWithEmailAndPassword(
+      fireAuth,
+      data.email,
+      data.password
+    );
 
-    try {
-      const { user } = await createUserWithEmailAndPassword(
-        fireAuth,
-        data.email,
-        data.password
-      );
+    const token = await user.getIdToken();
 
-      const token = await user.getIdToken();
+    dispatch(
+      setUser({
+        name: user.displayName || '',
+        email: user.email || '',
+        id: user.uid,
+        token: token,
+      })
+    );
 
-      dispatch(
-        setUser({
-          email: user.email || '',
-          id: user.uid,
-          token: token,
-        })
-      );
-    } catch (error) {
-      console.error(error);
-    }
+    router.push('/');
   };
 
   return (

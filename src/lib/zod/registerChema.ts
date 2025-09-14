@@ -1,10 +1,18 @@
 import { z } from 'zod';
 
+const nameRegex = /^[A-Z][a-zA-Z]*$/;
 const passwordRegex =
   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).+$/;
 
 export const registerSchema = z
   .object({
+    name: z
+      .string()
+      .min(1, 'Name is required')
+      .regex(
+        nameRegex,
+        'Name must start with a capital letter. The name must contain only Latin letters without spaces.'
+      ),
     email: z
       .string()
       .min(1, { message: 'Email cannot be empty' })

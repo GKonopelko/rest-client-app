@@ -7,12 +7,16 @@ import {
   LoginOutlined,
   UserAddOutlined,
   GlobalOutlined,
+  LogoutOutlined,
 } from '@ant-design/icons';
 import { Logo } from '../../components/Logo/Logo';
 import { useScrollDetection } from '../../hooks/useScrollDetection';
 import { useTranslations } from 'next-intl';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, usePathname } from 'next/navigation';
 import { useSwitchLocale } from '@/hooks/useSwitchLocale';
+import { useAuth } from '@/hooks/useAuth';
+import { useDispatch } from 'react-redux';
+import { removeUser } from '@/slices/userSlice';
 
 const { useBreakpoint } = Grid;
 
@@ -26,6 +30,9 @@ export default function Header() {
   const isScrolled = useScrollDetection();
   const params = useParams();
   const router = useRouter();
+  const pathname = usePathname();
+  const { isAuth } = useAuth();
+  const dispatch = useDispatch();
   const t = useTranslations('AppLayout');
   const currentLocale =
     typeof params?.locale === 'string' ? params.locale : 'en';
@@ -35,6 +42,17 @@ export default function Header() {
 
   const handleLocaleSwitch = (targetLocale: string) => {
     switchLocale(currentLocale, targetLocale);
+  };
+
+  const handleSignOut = () => {
+    dispatch(removeUser());
+
+    if (pathname === '/') {
+      router.replace('/');
+      return;
+    }
+
+    router.push('/');
   };
 
   return (
@@ -68,24 +86,37 @@ export default function Header() {
           </Button>
         </Space.Compact>
 
-        <Button
-          type="default"
-          icon={<LoginOutlined />}
-          aria-label={t('signInButton')}
-          className={styles['sign-in-button']}
-          onClick={() => router.push('/sign-in')}
-        >
-          {showText ? t('signInButton') : ''}
-        </Button>
+        {isAuth ? (
+          <Button
+            type="primary"
+            icon={<LogoutOutlined />}
+            aria-label={'aboba'}
+            onClick={handleSignOut}
+          >
+            {showText ? 'aboba' : ''}
+          </Button>
+        ) : (
+          <>
+            <Button
+              type="default"
+              icon={<LoginOutlined />}
+              aria-label={t('signInButton')}
+              className={styles['sign-in-button']}
+              onClick={() => router.push('/sign-in')}
+            >
+              {showText ? t('signInButton') : ''}
+            </Button>
 
-        <Button
-          type="primary"
-          icon={<UserAddOutlined />}
-          aria-label={t('signUpButton')}
-          onClick={() => router.push('/sign-up')}
-        >
-          {showText ? t('signUpButton') : ''}
-        </Button>
+            <Button
+              type="primary"
+              icon={<UserAddOutlined />}
+              aria-label={t('signUpButton')}
+              onClick={() => router.push('/sign-up')}
+            >
+              {showText ? t('signUpButton') : ''}
+            </Button>
+          </>
+        )}
       </div>
     </header>
   );
