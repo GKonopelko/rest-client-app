@@ -1,22 +1,13 @@
-'use client';
-
+import { LoginForm } from '@/components/LoginForm/LoginForm';
 import styles from './SignInPage.module.css';
-import { Button } from 'antd';
-import { useRouter } from 'next/navigation';
 
-export default function SignInPage() {
-  const router = useRouter();
-
+export default function SignUpPage() {
   return (
-    <>
-      <div className={styles.page}>Sign In Page</div>
-      <Button
-        type="primary"
-        size="large"
-        onClick={() => router.push('/sign-up')}
-      >
-        OR Sign Up
-      </Button>
-    </>
+    <div className={styles.page}>
+      <section className={styles.content}>
+        <h1>Sign In</h1>
+        <LoginForm />
+      </section>
+    </div>
   );
 }

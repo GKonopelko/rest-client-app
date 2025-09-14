@@ -1,22 +1,21 @@
 'use client';
 
 import { setUser } from '@/slices/userSlice';
-import styles from './RegisterForm.module.css';
+import styles from './LoginForm.module.css';
 import { Button, Form, Input } from 'antd';
 import { useForm, Controller } from 'react-hook-form';
 import { useDispatch } from 'react-redux';
 import { app } from '@/lib/firebase/firebase';
 import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { registerSchema } from '@/lib/zod/registerChema';
+import { loginSchema } from '@/lib/zod/loginSchema';
 
 type FormValues = {
   email: string;
   password: string;
-  confirmPassword: string;
 };
 
-export const RegisterForm = () => {
+export const LoginForm = () => {
   const dispatch = useDispatch();
 
   const {
@@ -27,10 +26,9 @@ export const RegisterForm = () => {
     defaultValues: {
       email: '',
       password: '',
-      confirmPassword: '',
     },
     mode: 'onChange',
-    resolver: zodResolver(registerSchema),
+    resolver: zodResolver(loginSchema),
   });
 
   const submit = async (data: FormValues) => {
@@ -85,20 +83,6 @@ export const RegisterForm = () => {
           control={control}
           render={({ field }) => (
             <Input.Password placeholder="Enter password" {...field} />
-          )}
-        />
-      </Form.Item>
-
-      <Form.Item
-        label={<span className={styles.label}>Confirm Password</span>}
-        validateStatus={errors.confirmPassword ? 'error' : ''}
-        help={errors.confirmPassword?.message}
-      >
-        <Controller
-          name="confirmPassword"
-          control={control}
-          render={({ field }) => (
-            <Input.Password placeholder="Confirm password" {...field} />
           )}
         />
       </Form.Item>
