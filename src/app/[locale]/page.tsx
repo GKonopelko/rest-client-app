@@ -4,21 +4,26 @@ import { Card, Typography, Button, Space } from 'antd';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import styles from './page.module.css';
+import { useSelector } from 'react-redux';
+import { selectUserName } from '@/slices/userSlice';
+import { RootState } from '@/store';
 
 const { Title, Paragraph, Link: AntLink } = Typography;
 
 export default function AppMainPage() {
   const t = useTranslations('MainPage');
   const router = useRouter();
+  const selectedUserName = useSelector((state: RootState) =>
+    selectUserName(state)
+  );
 
-  const isAuthenticated = false;
   const userName = 'User';
 
   return (
     <div className={styles.page}>
       <section className={styles.hero}>
         <Card className={styles['welcome-card']}>
-          {isAuthenticated ? (
+          {selectedUserName ? (
             <>
               <Title level={2} className={styles['welcome-title']}>
                 {t('welcomeBack', { name: userName })}

@@ -1,10 +1,8 @@
 'use client';
 
-import { setUser } from '@/slices/userSlice';
 import styles from './LoginForm.module.css';
 import { Button, Form, Input } from 'antd';
 import { useForm, Controller } from 'react-hook-form';
-import { useDispatch } from 'react-redux';
 import { app } from '@/lib/firebase/firebase';
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -17,7 +15,6 @@ type FormValues = {
 };
 
 export const LoginForm = () => {
-  const dispatch = useDispatch();
   const router = useRouter();
   const {
     control,
@@ -42,14 +39,11 @@ export const LoginForm = () => {
 
     const token = await user.getIdToken();
 
-    dispatch(
-      setUser({
-        name: user.displayName || '',
-        email: user.email || '',
-        id: user.uid,
-        token: token,
-      })
-    );
+    await fetch('/api/setToken', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token }),
+    });
 
     router.push('/');
   };

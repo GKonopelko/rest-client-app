@@ -1,10 +1,8 @@
 'use client';
 
-import { setUser } from '@/slices/userSlice';
 import styles from './RegisterForm.module.css';
 import { Button, Form, Input } from 'antd';
 import { useForm, Controller } from 'react-hook-form';
-import { useDispatch } from 'react-redux';
 import { app } from '@/lib/firebase/firebase';
 import {
   getAuth,
@@ -24,7 +22,6 @@ type FormValues = {
 };
 
 export const RegisterForm = () => {
-  const dispatch = useDispatch();
   const router = useRouter();
   const {
     control,
@@ -53,17 +50,15 @@ export const RegisterForm = () => {
       );
 
       await updateProfile(user, { displayName: data.name });
+      await user.reload();
 
       const token = await user.getIdToken();
 
-      dispatch(
-        setUser({
-          name: user.displayName || '',
-          email: user.email || '',
-          id: user.uid,
-          token: token,
-        })
-      );
+      await fetch('/api/setToken', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token }),
+      });
 
       router.push('/');
     } catch (error) {

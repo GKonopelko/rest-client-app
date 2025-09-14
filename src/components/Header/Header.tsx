@@ -14,9 +14,10 @@ import { useScrollDetection } from '../../hooks/useScrollDetection';
 import { useTranslations } from 'next-intl';
 import { useParams, useRouter, usePathname } from 'next/navigation';
 import { useSwitchLocale } from '@/hooks/useSwitchLocale';
-import { useAuth } from '@/hooks/useAuth';
-import { useDispatch } from 'react-redux';
-import { removeUser } from '@/slices/userSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { removeUser, selectUserName } from '@/slices/userSlice';
+import { RootState } from '@/store';
+import { getAuth, signOut } from 'firebase/auth';
 
 const { useBreakpoint } = Grid;
 
@@ -31,8 +32,10 @@ export default function Header() {
   const params = useParams();
   const router = useRouter();
   const pathname = usePathname();
-  const { isAuth } = useAuth();
   const dispatch = useDispatch();
+  const selectedUserName = useSelector((state: RootState) =>
+    selectUserName(state)
+  );
   const t = useTranslations('AppLayout');
   const currentLocale =
     typeof params?.locale === 'string' ? params.locale : 'en';
@@ -44,15 +47,29 @@ export default function Header() {
     switchLocale(currentLocale, targetLocale);
   };
 
-  const handleSignOut = () => {
-    dispatch(removeUser());
+  const handleSignOut = async () => {
+    const auth = getAuth();
 
-    if (pathname === '/') {
-      router.replace('/');
-      return;
+    try {
+      await signOut(auth);
+
+      dispatch(removeUser());
+
+      await fetch('/api/setToken', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: '' }),
+      });
+
+      if (pathname === '/') {
+        router.replace('/');
+        return;
+      }
+
+      router.push('/');
+    } catch (error) {
+      console.error('Sign out error:', error);
     }
-
-    router.push('/');
   };
 
   return (
@@ -86,7 +103,7 @@ export default function Header() {
           </Button>
         </Space.Compact>
 
-        {isAuth ? (
+        {selectedUserName ? (
           <Button
             type="primary"
             icon={<LogoutOutlined />}
