@@ -2,8 +2,7 @@ import { z } from 'zod';
 import { useTranslations } from 'next-intl';
 
 const nameRegex = /^[A-Z][a-zA-Z]*$/;
-const passwordRegex =
-  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).+$/;
+const passwordRegex = /^(?=.*\p{L})(?=.*\d)(?=.*[^\p{L}\d\s]).+$/u;
 
 export const useRegisterSchema = () => {
   const t = useTranslations('SignUpPage');

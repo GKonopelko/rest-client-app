@@ -68,7 +68,7 @@
     "emailInvalidDomain": "Domain name is missing",
     "emailAlreadyInUse": "This email is already in use",
     "passwordMin": "Password must be at least 8 characters",
-    "passwordWeak": "Password is too weak or contains non-Latin characters",
+    "passwordWeak": "Password is too simple, please add at least one letter, one number and one special character",
     "passwordsMismatch": "Passwords must match"
   },
   "RestClientPage": {
