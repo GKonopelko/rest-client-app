@@ -2,6 +2,7 @@
   "AppLayout": {
     "signInButton": "Sign In",
     "signUpButton": "Sign Up",
+    "signOutButton": "Sign Out",
     "localeRu": "Русский",
     "localeEn": "English"
   },

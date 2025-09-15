@@ -33,9 +33,7 @@ export default function Header() {
   const router = useRouter();
   const pathname = usePathname();
   const dispatch = useDispatch();
-  const selectedUserName = useSelector((state: RootState) =>
-    selectUserName(state)
-  );
+  const userName = useSelector((state: RootState) => selectUserName(state));
   const t = useTranslations('AppLayout');
   const currentLocale =
     typeof params?.locale === 'string' ? params.locale : 'en';
@@ -103,14 +101,14 @@ export default function Header() {
           </Button>
         </Space.Compact>
 
-        {selectedUserName ? (
+        {userName ? (
           <Button
             type="primary"
             icon={<LogoutOutlined />}
-            aria-label={'aboba'}
+            aria-label={t('signOutButton')}
             onClick={handleSignOut}
           >
-            {showText ? 'aboba' : ''}
+            {showText ? t('signOutButton') : ''}
           </Button>
         ) : (
           <>

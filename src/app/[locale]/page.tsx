@@ -13,17 +13,13 @@ const { Title, Paragraph, Link: AntLink } = Typography;
 export default function AppMainPage() {
   const t = useTranslations('MainPage');
   const router = useRouter();
-  const selectedUserName = useSelector((state: RootState) =>
-    selectUserName(state)
-  );
-
-  const userName = 'User';
+  const userName = useSelector((state: RootState) => selectUserName(state));
 
   return (
     <div className={styles.page}>
       <section className={styles.hero}>
         <Card className={styles['welcome-card']}>
-          {selectedUserName ? (
+          {userName ? (
             <>
               <Title level={2} className={styles['welcome-title']}>
                 {t('welcomeBack', { name: userName })}
