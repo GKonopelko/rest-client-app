@@ -6,8 +6,9 @@ import { useForm, Controller } from 'react-hook-form';
 import { app } from '@/lib/firebase/firebase';
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { loginSchema } from '@/lib/zod/loginSchema';
+import { useLoginSchema } from '@/lib/zod/loginSchema';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 
 type FormValues = {
   email: string;
@@ -15,7 +16,9 @@ type FormValues = {
 };
 
 export const LoginForm = () => {
+  const t = useTranslations('SignInPage');
   const router = useRouter();
+  const loginSchema = useLoginSchema();
   const {
     control,
     handleSubmit,
@@ -55,19 +58,21 @@ export const LoginForm = () => {
       onFinish={handleSubmit(submit)}
     >
       <Form.Item
-        label={<span className={styles.label}>Email</span>}
+        label={<span className={styles.label}>{t('emailField')}</span>}
         validateStatus={errors.email ? 'error' : ''}
         help={errors.email?.message}
       >
         <Controller
           name="email"
           control={control}
-          render={({ field }) => <Input placeholder="Enter email" {...field} />}
+          render={({ field }) => (
+            <Input placeholder={t('emailPlaceholder')} {...field} />
+          )}
         />
       </Form.Item>
 
       <Form.Item
-        label={<span className={styles.label}>Password</span>}
+        label={<span className={styles.label}>{t('passwordField')}</span>}
         validateStatus={errors.password ? 'error' : ''}
         help={errors.password?.message}
       >
@@ -75,14 +80,14 @@ export const LoginForm = () => {
           name="password"
           control={control}
           render={({ field }) => (
-            <Input.Password placeholder="Enter password" {...field} />
+            <Input.Password placeholder={t('passwordPlaceholder')} {...field} />
           )}
         />
       </Form.Item>
 
       <Form.Item className={styles.field}>
         <Button htmlType="submit" type="primary" disabled={!isValid}>
-          Submit
+          {t('submitButton')}
         </Button>
       </Form.Item>
     </Form>

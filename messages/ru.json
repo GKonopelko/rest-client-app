@@ -9,8 +9,8 @@
   "MainPage": {
     "welcome": "Добро пожаловать!",
     "welcomeDescription": "Войдите или создайте аккаунт, чтобы начать использовать наш REST Клиент",
-    "welcomeBack": "С возвращением, {name}!",
-    "welcomeBackDescription": "Продолжайте работу с вашими REST API запросами",
+    "welcomeBack": "Добро пожаловать, {name}!",
+    "welcomeBackDescription": "Вы можете работать REST API запросами",
     "restClient": "REST Клиент",
     "history": "История",
     "variables": "Переменные",
@@ -39,7 +39,16 @@
     "highlight4": "Управление состоянием и интеграция с API",
     "highlight5": "Стратегии тестирования и деплоя"
   },
-  "SignInPage": {},
+  "SignInPage": {
+    "title": "Вход",
+    "emailField": "Электронная почта",
+    "emailPlaceholder": "Введите адрес эл. почты",
+    "passwordField": "Пароль",
+    "passwordPlaceholder": "Введите пароль",
+    "submitButton": "Отправить",
+    "emptyEmailError": "Поле эл. почты обязательно для заполнения",
+    "emptyPasswordError": "Поле пароля обязательно для заполнения"
+  },
   "SignUpPage": {},
   "RestClientPage": {
     "title": "Протестируй свой запрос",

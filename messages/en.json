@@ -9,8 +9,8 @@
   "MainPage": {
     "welcome": "Welcome!",
     "welcomeDescription": "Sign in or create an account to start using our REST Client",
-    "welcomeBack": "Welcome Back, {name}!",
-    "welcomeBackDescription": "Continue working with your REST API requests",
+    "welcomeBack": "Welcome, {name}!",
+    "welcomeBackDescription": "You can work with REST API requests",
     "restClient": "REST Client",
     "history": "History",
     "variables": "Variables",
@@ -39,7 +39,16 @@
     "highlight4": "State management and API integration",
     "highlight5": "Testing and deployment strategies"
   },
-  "SignInPage": {},
+  "SignInPage": {
+    "title": "Sign In",
+    "emailField": "Email",
+    "emailPlaceholder": "Enter email",
+    "passwordField": "Password",
+    "passwordPlaceholder": "Enter password",
+    "submitButton": "Submit",
+    "emptyEmailError": "Email field is required",
+    "emptyPasswordError": "Password field is required"
+  },
   "SignUpPage": {},
   "RestClientPage": {
     "title": "Test your request",

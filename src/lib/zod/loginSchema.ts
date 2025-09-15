@@ -1,6 +1,11 @@
 import { z } from 'zod';
+import { useTranslations } from 'next-intl';
 
-export const loginSchema = z.object({
-  email: z.string().min(1, { message: 'Email cannot be empty' }),
-  password: z.string().min(1, { message: 'Password cannot be empty' }),
-});
+export const useLoginSchema = () => {
+  const t = useTranslations('SignInPage');
+
+  return z.object({
+    email: z.string().min(1, { message: t('emptyEmailError') }),
+    password: z.string().min(1, { message: t('emptyPasswordError') }),
+  });
+};
