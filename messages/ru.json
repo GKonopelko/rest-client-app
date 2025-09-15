@@ -2,14 +2,15 @@
   "AppLayout": {
     "signInButton": "Вход",
     "signUpButton": "Регистрация",
+    "signOutButton": "Выход",
     "localeRu": "Русский",
     "localeEn": "English"
   },
   "MainPage": {
     "welcome": "Добро пожаловать!",
     "welcomeDescription": "Войдите или создайте аккаунт, чтобы начать использовать наш REST Клиент",
-    "welcomeBack": "С возвращением, {name}!",
-    "welcomeBackDescription": "Продолжайте работу с вашими REST API запросами",
+    "welcomeBack": "Добро пожаловать, {name}!",
+    "welcomeBackDescription": "Вы можете работать REST API запросами",
     "restClient": "REST Клиент",
     "history": "История",
     "variables": "Переменные",
@@ -38,8 +39,38 @@
     "highlight4": "Управление состоянием и интеграция с API",
     "highlight5": "Стратегии тестирования и деплоя"
   },
-  "SignInPage": {},
-  "SignUpPage": {},
+  "SignInPage": {
+    "title": "Вход",
+    "emailField": "Электронная почта",
+    "emailPlaceholder": "Введите адрес эл. почты",
+    "passwordField": "Пароль",
+    "passwordPlaceholder": "Введите пароль",
+    "submitButton": "Отправить",
+    "emptyEmailError": "Поле эл. почты обязательно для заполнения",
+    "emptyPasswordError": "Поле пароля обязательно для заполнения"
+  },
+  "SignUpPage": {
+    "title": "Регистрация",
+    "nameField": "Имя",
+    "namePlaceholder": "Введите имя",
+    "emailField": "Электронная почта",
+    "emailPlaceholder": "Введите адрес эл. почты",
+    "passwordField": "Пароль",
+    "passwordPlaceholder": "Введите пароль",
+    "confirmPasswordField": "Подтверждение пароля",
+    "confirmPasswordPlaceholder": "Введите пароль ещё раз",
+    "submitButton": "Отправить",
+    "nameRequired": "Имя обязательно для заполнения",
+    "nameInvalid": "Имя должно начинаться с заглавной буквы и содержать только латинские буквы без пробелов",
+    "emailRequired": "Электронная почта обязательна для заполнения",
+    "emailNoSpaces": "Электронная почта не должна содержать пробелов",
+    "emailMissingAt": "Отсутствует или неверно использован символ @",
+    "emailInvalidDomain": "Отсутствует доменное имя",
+    "emailAlreadyInUse": "Эта электронная почта уже используется",
+    "passwordMin": "Пароль должен содержать не менее 8 символов",
+    "passwordWeak": "Пароль слишком простой, добавьте как минимум одну букву, одну цифру и один специальный символ",
+    "passwordsMismatch": "Пароли должны совпадать"
+  },
   "RestClientPage": {
     "title": "Протестируйте свой запрос",
     "request": "Запрос",
@@ -47,6 +78,6 @@
     "submitButton": "Отправить",
     "inputError": "Пожалуйста, введите базовую ссылку!"
   },
-  "History": {},
-  "Variables": {}
+  "HistoryPage": {},
+  "VariablesPage": {}
 }

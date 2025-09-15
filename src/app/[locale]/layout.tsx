@@ -9,6 +9,7 @@ import { AntdRegistry } from '@ant-design/nextjs-registry';
 import { routing } from '../../i18n/routing';
 import StoreProvider from './StoreProvider';
 import AppLayout from '../../layouts/AppLayout/AppLayout';
+import { AuthProvider } from './AuthProvider';
 
 export const metadata: Metadata = {
   title: 'Rest SPB',
@@ -31,11 +32,13 @@ export default async function RootLayout({
 
   return (
     <StoreProvider>
-      <NextIntlClientProvider messages={messages}>
-        <AntdRegistry>
-          <AppLayout>{children}</AppLayout>
-        </AntdRegistry>
-      </NextIntlClientProvider>
+      <AuthProvider>
+        <NextIntlClientProvider messages={messages}>
+          <AntdRegistry>
+            <AppLayout>{children}</AppLayout>
+          </AntdRegistry>
+        </NextIntlClientProvider>
+      </AuthProvider>
     </StoreProvider>
   );
 }

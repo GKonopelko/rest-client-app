@@ -2,14 +2,15 @@
   "AppLayout": {
     "signInButton": "Sign In",
     "signUpButton": "Sign Up",
+    "signOutButton": "Sign Out",
     "localeRu": "Русский",
     "localeEn": "English"
   },
   "MainPage": {
     "welcome": "Welcome!",
     "welcomeDescription": "Sign in or create an account to start using our REST Client",
-    "welcomeBack": "Welcome Back, {name}!",
-    "welcomeBackDescription": "Continue working with your REST API requests",
+    "welcomeBack": "Welcome, {name}!",
+    "welcomeBackDescription": "You can work with REST API requests",
     "restClient": "REST Client",
     "history": "History",
     "variables": "Variables",
@@ -38,8 +39,38 @@
     "highlight4": "State management and API integration",
     "highlight5": "Testing and deployment strategies"
   },
-  "SignInPage": {},
-  "SignUpPage": {},
+  "SignInPage": {
+    "title": "Sign In",
+    "emailField": "Email",
+    "emailPlaceholder": "Enter email",
+    "passwordField": "Password",
+    "passwordPlaceholder": "Enter password",
+    "submitButton": "Submit",
+    "emptyEmailError": "Email field is required",
+    "emptyPasswordError": "Password field is required"
+  },
+  "SignUpPage": {
+    "title": "Sign Up",
+    "nameField": "Name",
+    "namePlaceholder": "Enter name",
+    "emailField": "Email",
+    "emailPlaceholder": "Enter email",
+    "passwordField": "Password",
+    "passwordPlaceholder": "Enter password",
+    "confirmPasswordField": "Confirm Password",
+    "confirmPasswordPlaceholder": "Enter password again",
+    "submitButton": "Submit",
+    "nameRequired": "Name is required",
+    "nameInvalid": "Name must start with a capital letter and contain only Latin letters without spaces",
+    "emailRequired": "Email is required",
+    "emailNoSpaces": "Email must not contain spaces",
+    "emailMissingAt": "Missing or incorrectly used @ symbol",
+    "emailInvalidDomain": "Domain name is missing",
+    "emailAlreadyInUse": "This email is already in use",
+    "passwordMin": "Password must be at least 8 characters",
+    "passwordWeak": "Password is too simple, please add at least one letter, one number and one special character",
+    "passwordsMismatch": "Passwords must match"
+  },
   "RestClientPage": {
     "title": "Test your request",
     "request": "Request",
@@ -47,6 +78,6 @@
     "submitButton": "Submit",
     "inputError": "Please enter your base link!"
   },
-  "History": {},
-  "Variables": {}
+  "HistoryPage": {},
+  "VariablesPage": {}
 }
