@@ -1,3 +1,5 @@
+'use client';
+
 import { LoginForm } from '@/components/LoginForm/LoginForm';
 import { useTranslations } from 'next-intl';
 import styles from './SignInPage.module.css';

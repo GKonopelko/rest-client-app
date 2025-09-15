@@ -11,8 +11,9 @@ import {
 } from 'firebase/auth';
 import { FirebaseError } from 'firebase/app';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { registerSchema } from '@/lib/zod/registerChema';
+import { useRegisterSchema } from '@/lib/zod/registerChema';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 
 type FormValues = {
   name: string;
@@ -23,6 +24,9 @@ type FormValues = {
 
 export const RegisterForm = () => {
   const router = useRouter();
+  const t = useTranslations('SignUpPage');
+  const registerSchema = useRegisterSchema();
+
   const {
     control,
     handleSubmit,
@@ -67,12 +71,12 @@ export const RegisterForm = () => {
       if (err.code === 'auth/email-already-in-use') {
         setError('email', {
           type: 'manual',
-          message: 'Такой email уже зарегистрирован',
+          message: t('emailAlreadyInUse'),
         });
         return;
       }
 
-      console.log(error);
+      console.error(error);
     }
   };
 
@@ -83,31 +87,35 @@ export const RegisterForm = () => {
       onFinish={handleSubmit(submit)}
     >
       <Form.Item
-        label={<span className={styles.label}>Name</span>}
+        label={<span className={styles.label}>{t('nameField')}</span>}
         validateStatus={errors.name ? 'error' : ''}
         help={errors.name?.message}
       >
         <Controller
           name="name"
           control={control}
-          render={({ field }) => <Input placeholder="Enter name" {...field} />}
+          render={({ field }) => (
+            <Input placeholder={t('namePlaceholder')} {...field} />
+          )}
         />
       </Form.Item>
 
       <Form.Item
-        label={<span className={styles.label}>Email</span>}
+        label={<span className={styles.label}>{t('emailField')}</span>}
         validateStatus={errors.email ? 'error' : ''}
         help={errors.email?.message}
       >
         <Controller
           name="email"
           control={control}
-          render={({ field }) => <Input placeholder="Enter email" {...field} />}
+          render={({ field }) => (
+            <Input placeholder={t('emailPlaceholder')} {...field} />
+          )}
         />
       </Form.Item>
 
       <Form.Item
-        label={<span className={styles.label}>Password</span>}
+        label={<span className={styles.label}>{t('passwordField')}</span>}
         validateStatus={errors.password ? 'error' : ''}
         help={errors.password?.message}
       >
@@ -115,13 +123,15 @@ export const RegisterForm = () => {
           name="password"
           control={control}
           render={({ field }) => (
-            <Input.Password placeholder="Enter password" {...field} />
+            <Input.Password placeholder={t('passwordPlaceholder')} {...field} />
           )}
         />
       </Form.Item>
 
       <Form.Item
-        label={<span className={styles.label}>Confirm Password</span>}
+        label={
+          <span className={styles.label}>{t('confirmPasswordField')}</span>
+        }
         validateStatus={errors.confirmPassword ? 'error' : ''}
         help={errors.confirmPassword?.message}
       >
@@ -129,14 +139,17 @@ export const RegisterForm = () => {
           name="confirmPassword"
           control={control}
           render={({ field }) => (
-            <Input.Password placeholder="Confirm password" {...field} />
+            <Input.Password
+              placeholder={t('confirmPasswordPlaceholder')}
+              {...field}
+            />
           )}
         />
       </Form.Item>
 
       <Form.Item className={styles.field}>
         <Button htmlType="submit" type="primary" disabled={!isValid}>
-          Submit
+          {t('submitButton')}
         </Button>
       </Form.Item>
     </Form>

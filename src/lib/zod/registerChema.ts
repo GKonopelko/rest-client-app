@@ -1,40 +1,36 @@
 import { z } from 'zod';
+import { useTranslations } from 'next-intl';
 
 const nameRegex = /^[A-Z][a-zA-Z]*$/;
 const passwordRegex =
   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).+$/;
 
-export const registerSchema = z
-  .object({
-    name: z
-      .string()
-      .min(1, 'Name is required')
-      .regex(
-        nameRegex,
-        'Name must start with a capital letter. The name must contain only Latin letters without spaces.'
-      ),
-    email: z
-      .string()
-      .min(1, { message: 'Email cannot be empty' })
-      .regex(/^\S+$/, { message: 'Email must not contain spaces' })
-      .regex(/(?=.*@)/, { message: 'Missing or incorrect use of the @ symbol' })
-      .regex(/^[^@]+@[^@]+\.[^@]+$/, { message: 'Domain name missing' }),
-    password: z
-      .string()
-      .min(8, 'Password must be at least 8 characters')
-      .regex(
-        passwordRegex,
-        'The password is too weak or contains non-Latin characters'
-      ),
-    confirmPassword: z
-      .string()
-      .min(8, 'Password must be at least 8 characters')
-      .regex(
-        passwordRegex,
-        'The password is too weak or contains non-Latin characters'
-      ),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: 'Passwords must match',
-    path: ['confirmPassword'],
-  });
+export const useRegisterSchema = () => {
+  const t = useTranslations('SignUpPage');
+
+  return z
+    .object({
+      name: z
+        .string()
+        .min(1, { message: t('nameRequired') })
+        .regex(nameRegex, { message: t('nameInvalid') }),
+      email: z
+        .string()
+        .min(1, { message: t('emailRequired') })
+        .regex(/^\S+$/, { message: t('emailNoSpaces') })
+        .regex(/(?=.*@)/, { message: t('emailMissingAt') })
+        .regex(/^[^@]+@[^@]+\.[^@]+$/, { message: t('emailInvalidDomain') }),
+      password: z
+        .string()
+        .min(8, { message: t('passwordMin') })
+        .regex(passwordRegex, { message: t('passwordWeak') }),
+      confirmPassword: z
+        .string()
+        .min(8, { message: t('passwordMin') })
+        .regex(passwordRegex, { message: t('passwordWeak') }),
+    })
+    .refine((data) => data.password === data.confirmPassword, {
+      message: t('passwordsMismatch'),
+      path: ['confirmPassword'],
+    });
+};
