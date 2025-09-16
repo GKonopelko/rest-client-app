@@ -4,12 +4,12 @@ import React, { useState, useEffect } from 'react';
 import { Button, Input, Table, Space, message, Card, Typography } from 'antd';
 import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import styles from './VariablesPage.module.css';
-
-interface Variable {
-  id: string;
-  name: string;
-  value: string;
-}
+import {
+  Variable,
+  loadVariablesFromStorage,
+  saveVariablesToStorage,
+  isValidVariableName,
+} from '@/utils/variablesUtils';
 
 export default function VariablesPage() {
   const [variables, setVariables] = useState<Variable[]>([]);
@@ -17,29 +17,29 @@ export default function VariablesPage() {
   const [newValue, setNewValue] = useState('');
 
   useEffect(() => {
-    const savedVariables = localStorage.getItem(
-      'superteam-spbrest-rest-client-variables'
-    );
-    if (savedVariables) {
-      try {
-        setVariables(JSON.parse(savedVariables));
-      } catch (error) {
-        console.error('Failed to parse variables from local storage:', error);
-        message.error('Failed to load variables');
-      }
-    }
+    const savedVariables = loadVariablesFromStorage();
+    setVariables(savedVariables);
   }, []);
 
   useEffect(() => {
-    localStorage.setItem(
-      'superteam-spbrest-rest-client-variables',
-      JSON.stringify(variables)
-    );
+    saveVariablesToStorage(variables);
   }, [variables]);
 
   const handleAddVariable = () => {
     if (!newName.trim() || !newValue.trim()) {
       message.error('Name and value are required');
+      return;
+    }
+
+    if (!isValidVariableName(newName.trim())) {
+      message.error(
+        'Variable name can only contain letters, numbers, and underscores, and cannot start with a number'
+      );
+      return;
+    }
+
+    if (variables.some((v) => v.name === newName.trim())) {
+      message.error('Variable with this name already exists');
       return;
     }
 
@@ -65,6 +65,7 @@ export default function VariablesPage() {
       title: 'Name',
       dataIndex: 'name',
       key: 'name',
+      render: (name: string) => `{{${name}}}`,
     },
     {
       title: 'Value',
@@ -74,7 +75,7 @@ export default function VariablesPage() {
     {
       title: 'Actions',
       key: 'actions',
-      render: (_, record: Variable) => (
+      render: (_: unknown, record: Variable) => (
         <Space>
           <Button
             type="primary"
@@ -97,14 +98,17 @@ export default function VariablesPage() {
           <Typography.Title level={2} className={styles.title}>
             Variables
           </Typography.Title>
-          <p>Manage your environment variables for API requests</p>
+          <p>
+            Manage your environment variables for API requests. Use{' '}
+            <code>{'{{variableName}}'}</code> format in your requests.
+          </p>
         </div>
 
         <div className={styles.addSection}>
           <Typography.Title level={3}>Add New Variable</Typography.Title>
           <Space.Compact className={styles.inputGroup}>
             <Input
-              placeholder="Variable name"
+              placeholder="Variable name (e.g., api_key)"
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
               className={styles.nameInput}
