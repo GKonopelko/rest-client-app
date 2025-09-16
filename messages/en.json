@@ -97,6 +97,10 @@
     "duplicateName": "Variable with this name already exists",
     "addSuccess": "Variable added successfully",
     "deleteSuccess": "Variable deleted successfully",
-    "noVariables": "No variables added yet"
+    "noVariables": "No variables added yet",
+    "nameRequired": "Name is required",
+    "valueRequired": "Value is required",
+    "invalidValue": "Invalid value",
+    "errorText": "Error message"
   }
 }

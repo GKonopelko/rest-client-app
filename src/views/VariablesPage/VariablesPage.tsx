@@ -9,6 +9,7 @@ import {
   loadVariablesFromStorage,
   saveVariablesToStorage,
   isValidVariableName,
+  validateVariableValue,
 } from '@/utils/variablesUtils';
 import { useTranslations } from 'next-intl';
 
@@ -16,6 +17,8 @@ export default function VariablesPage() {
   const [variables, setVariables] = useState<Variable[]>([]);
   const [newName, setNewName] = useState('');
   const [newValue, setNewValue] = useState('');
+  const [nameError, setNameError] = useState('');
+  const [valueError, setValueError] = useState('');
   const t = useTranslations('VariablesPage');
 
   useEffect(() => {
@@ -27,19 +30,65 @@ export default function VariablesPage() {
     saveVariablesToStorage(variables);
   }, [variables]);
 
+  const validateName = (name: string): boolean => {
+    if (!name.trim()) {
+      setNameError(t('nameRequired'));
+      return false;
+    }
+
+    if (!isValidVariableName(name.trim())) {
+      setNameError(t('invalidName'));
+      return false;
+    }
+
+    if (variables.some((v) => v.name === name.trim())) {
+      setNameError(t('duplicateName'));
+      return false;
+    }
+
+    setNameError('');
+    return true;
+  };
+
+  const validateValue = (value: string): boolean => {
+    if (!value.trim()) {
+      setValueError(t('valueRequired'));
+      return false;
+    }
+
+    const validationResult = validateVariableValue(value.trim());
+    if (!validationResult.isValid) {
+      setValueError(validationResult.message || t('invalidValue'));
+      return false;
+    }
+
+    setValueError('');
+    return true;
+  };
+
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setNewName(value);
+    if (nameError) validateName(value);
+  };
+
+  const handleValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setNewValue(value);
+    if (valueError) validateValue(value);
+  };
+
   const handleAddVariable = () => {
-    if (!newName.trim() || !newValue.trim()) {
-      message.error(t('nameValueRequired'));
-      return;
-    }
+    const isNameValid = validateName(newName);
+    const isValueValid = validateValue(newValue);
 
-    if (!isValidVariableName(newName.trim())) {
-      message.error(t('invalidName'));
-      return;
-    }
-
-    if (variables.some((v) => v.name === newName.trim())) {
-      message.error(t('duplicateName'));
+    if (!isNameValid || !isValueValid) {
+      if (!isNameValid) {
+        message.error(nameError);
+      }
+      if (!isValueValid) {
+        message.error(valueError);
+      }
       return;
     }
 
@@ -52,12 +101,22 @@ export default function VariablesPage() {
     setVariables((prev) => [...prev, newVariable]);
     setNewName('');
     setNewValue('');
+    setNameError('');
+    setValueError('');
     message.success(t('addSuccess'));
   };
 
   const handleDeleteVariable = (id: string) => {
     setVariables((prev) => prev.filter((v) => v.id !== id));
     message.success(t('deleteSuccess'));
+  };
+
+  const handleBlurName = () => {
+    validateName(newName);
+  };
+
+  const handleBlurValue = () => {
+    validateValue(newValue);
   };
 
   const columns = [
@@ -71,6 +130,11 @@ export default function VariablesPage() {
       title: t('valueColumn'),
       dataIndex: 'value',
       key: 'value',
+      render: (value: string) => (
+        <span title={value}>
+          {value.length > 50 ? `${value.substring(0, 50)}...` : value}
+        </span>
+      ),
     },
     {
       title: t('actionsColumn'),
@@ -106,19 +170,35 @@ export default function VariablesPage() {
 
         <div className={styles['add-section']}>
           <Typography.Title level={3}>{t('addNew')}</Typography.Title>
-          <Space.Compact className={styles['input-group']}>
-            <Input
-              placeholder={t('namePlaceholder')}
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-              className={styles['name-input']}
-            />
-            <Input
-              placeholder={t('valuePlaceholder')}
-              value={newValue}
-              onChange={(e) => setNewValue(e.target.value)}
-              className={styles['value-input']}
-            />
+          <Space.Compact className={styles['input-group']} direction="vertical">
+            <div>
+              <Input
+                placeholder={t('namePlaceholder')}
+                value={newName}
+                onChange={handleNameChange}
+                onBlur={handleBlurName}
+                className={styles['name-input']}
+                status={nameError ? 'error' : ''}
+              />
+              {nameError && (
+                <div className={styles['error-text']}>{nameError}</div>
+              )}
+            </div>
+
+            <div>
+              <Input
+                placeholder={t('valuePlaceholder')}
+                value={newValue}
+                onChange={handleValueChange}
+                onBlur={handleBlurValue}
+                className={styles['value-input']}
+                status={valueError ? 'error' : ''}
+              />
+              {valueError && (
+                <div className={styles['error-text']}>{valueError}</div>
+              )}
+            </div>
+
             <Button
               type="primary"
               icon={<PlusOutlined />}
@@ -138,6 +218,7 @@ export default function VariablesPage() {
             rowKey="id"
             pagination={false}
             locale={{ emptyText: t('noVariables') }}
+            scroll={{ x: true }}
           />
         </div>
       </Card>
