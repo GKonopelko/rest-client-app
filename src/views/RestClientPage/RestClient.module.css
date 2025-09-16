@@ -1,40 +1,139 @@
 .section {
   display: flex;
   width: 80vw;
-  margin: 0px auto;
+  margin: 0 auto;
 }
 
 .card {
   width: 100%;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  padding: 24px;
 }
 
 .title {
   display: flex;
   width: fit-content;
-  margin: 0px auto 30px auto;
+  margin: 0 auto 30px auto;
   color: #1890ff !important;
 }
 
-.form,
-.url-line {
+.form {
   width: 100%;
 }
 
 .url-line {
-  display: grid;
-  grid-template-columns: 120px 1fr 120px;
+  width: 100%;
+  display: flex;
+  gap: 8px;
 }
 
 .select {
   min-width: 120px;
-  border-top-right-radius: 0px;
+  flex-shrink: 0;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
 }
 
 .url-wrapper {
-  width: inherit;
+  flex: 1;
+  min-width: 0;
+}
+
+.url-wrapper :global(.ant-input) {
+  border-radius: 0;
 }
 
 .submit-button {
   width: 120px;
+  flex-shrink: 0;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.panels {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.panel-row {
+  display: flex;
+  gap: 16px;
+}
+
+.panel {
+  background: #fafafa;
+  padding: 16px;
+  border-radius: 6px;
+  border: 1px solid #d9d9d9;
+  flex: 1;
+}
+
+.panel-full {
+  background: #fafafa;
+  padding: 16px;
+  border-radius: 6px;
+  border: 1px solid #d9d9d9;
+}
+
+.text-area {
+  font-family: monospace;
+}
+
+.text-area-readonly {
+  font-family: monospace;
+  background-color: #f5f5f5;
+}
+
+.variables-info {
+  margin-top: 24px;
+  padding: 16px;
+  background: #e6f7ff;
+  border-radius: 6px;
+  border: 1px solid #91d5ff;
+}
+
+.variables-info code {
+  background: #fff;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-family: monospace;
+  color: #d63384;
+}
+
+.warning-text {
+  margin-top: 8px;
+}
+
+@media (width <= 768px) {
+  .section {
+    width: 95vw;
+  }
+
+  .url-line {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .select,
+  .submit-button {
+    width: 100%;
+  }
+
+  .select {
+    border-radius: 6px;
+  }
+
+  .submit-button {
+    border-radius: 6px;
+  }
+
+  .url-wrapper :global(.ant-input) {
+    border-radius: 6px;
+  }
+
+  .panel-row {
+    flex-direction: column;
+  }
 }
