@@ -1,34 +1,28 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button, Input, Table, Space, message, Card, Typography } from 'antd';
 import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import styles from './VariablesPage.module.css';
 import {
   Variable,
-  loadVariablesFromStorage,
-  saveVariablesToStorage,
   isValidVariableName,
   validateVariableValue,
+  STORAGE_KEY,
 } from '@/utils/variablesUtils';
 import { useTranslations } from 'next-intl';
+import { useLocalStorage } from '@/hooks/useLocalStorage';
 
 export default function VariablesPage() {
-  const [variables, setVariables] = useState<Variable[]>([]);
+  const [variables, setVariables] = useLocalStorage<Variable[]>(
+    STORAGE_KEY,
+    []
+  );
   const [newName, setNewName] = useState('');
   const [newValue, setNewValue] = useState('');
   const [nameError, setNameError] = useState('');
   const [valueError, setValueError] = useState('');
   const t = useTranslations('VariablesPage');
-
-  useEffect(() => {
-    const savedVariables = loadVariablesFromStorage();
-    setVariables(savedVariables);
-  }, []);
-
-  useEffect(() => {
-    saveVariablesToStorage(variables);
-  }, [variables]);
 
   const validateName = (name: string): boolean => {
     if (!name.trim()) {
@@ -170,7 +164,7 @@ export default function VariablesPage() {
 
         <div className={styles['add-section']}>
           <Typography.Title level={3}>{t('addNew')}</Typography.Title>
-          <Space.Compact className={styles['input-group']} direction="vertical">
+          <div className={styles['input-group']}>
             <div>
               <Input
                 placeholder={t('namePlaceholder')}
@@ -207,7 +201,7 @@ export default function VariablesPage() {
             >
               {t('addButton')}
             </Button>
-          </Space.Compact>
+          </div>
         </div>
 
         <div className={styles['list-section']}>

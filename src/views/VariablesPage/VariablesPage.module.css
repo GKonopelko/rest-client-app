@@ -29,42 +29,6 @@
 .input-group {
   width: 100%;
   display: flex;
-  gap: 8px;
-}
-
-.name-input,
-.value-input {
-  flex: 1;
-  min-width: 0;
-}
-
-.add-button {
-  width: 120px;
-  flex-shrink: 0;
-}
-
-.list-section {
-  margin-top: 20px;
-}
-
-@media (width <= 768px) {
-  .section {
-    width: 95vw;
-  }
-
-  .input-group {
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .add-button {
-    width: 100%;
-  }
-}
-
-.input-group {
-  width: 100%;
-  display: flex;
   flex-direction: column;
   gap: 16px;
 }
@@ -79,6 +43,10 @@
   width: 120px;
   flex-shrink: 0;
   align-self: flex-start;
+}
+
+.list-section {
+  margin-top: 20px;
 }
 
 .error-text {
