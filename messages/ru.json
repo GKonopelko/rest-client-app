@@ -74,9 +74,9 @@
   "RestClientPage": {
     "title": "Протестируйте свой запрос",
     "request": "Запрос",
-    "urlPlaceholder": "Введите базовую ссылку",
+    "urlPlaceholder": "Введите URL (например, https://api.example.com)",
     "submitButton": "Отправить",
-    "inputError": "Пожалуйста, введите базовую ссылку!"
+    "inputError": "URL обязателен для заполнения"
   },
   "HistoryPage": {},
   "VariablesPage": {}
