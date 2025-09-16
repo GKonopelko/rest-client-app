@@ -10,7 +10,7 @@
     "welcome": "Добро пожаловать!",
     "welcomeDescription": "Войдите или создайте аккаунт, чтобы начать использовать наш REST Клиент",
     "welcomeBack": "Добро пожаловать, {name}!",
-    "welcomeBackDescription": "Вы можете работать REST API запросами",
+    "welcomeBackDescription": "Вы можете работать c REST API запросами",
     "restClient": "REST Клиент",
     "history": "История",
     "variables": "Переменные",
