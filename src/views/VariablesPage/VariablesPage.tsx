@@ -10,11 +10,13 @@ import {
   saveVariablesToStorage,
   isValidVariableName,
 } from '@/utils/variablesUtils';
+import { useTranslations } from 'next-intl';
 
 export default function VariablesPage() {
   const [variables, setVariables] = useState<Variable[]>([]);
   const [newName, setNewName] = useState('');
   const [newValue, setNewValue] = useState('');
+  const t = useTranslations('VariablesPage');
 
   useEffect(() => {
     const savedVariables = loadVariablesFromStorage();
@@ -27,19 +29,17 @@ export default function VariablesPage() {
 
   const handleAddVariable = () => {
     if (!newName.trim() || !newValue.trim()) {
-      message.error('Name and value are required');
+      message.error(t('nameValueRequired'));
       return;
     }
 
     if (!isValidVariableName(newName.trim())) {
-      message.error(
-        'Variable name can only contain letters, numbers, and underscores, and cannot start with a number'
-      );
+      message.error(t('invalidName'));
       return;
     }
 
     if (variables.some((v) => v.name === newName.trim())) {
-      message.error('Variable with this name already exists');
+      message.error(t('duplicateName'));
       return;
     }
 
@@ -52,28 +52,28 @@ export default function VariablesPage() {
     setVariables((prev) => [...prev, newVariable]);
     setNewName('');
     setNewValue('');
-    message.success('Variable added successfully');
+    message.success(t('addSuccess'));
   };
 
   const handleDeleteVariable = (id: string) => {
     setVariables((prev) => prev.filter((v) => v.id !== id));
-    message.success('Variable deleted successfully');
+    message.success(t('deleteSuccess'));
   };
 
   const columns = [
     {
-      title: 'Name',
+      title: t('nameColumn'),
       dataIndex: 'name',
       key: 'name',
       render: (name: string) => `{{${name}}}`,
     },
     {
-      title: 'Value',
+      title: t('valueColumn'),
       dataIndex: 'value',
       key: 'value',
     },
     {
-      title: 'Actions',
+      title: t('actionsColumn'),
       key: 'actions',
       render: (_: unknown, record: Variable) => (
         <Space>
@@ -84,7 +84,7 @@ export default function VariablesPage() {
             onClick={() => handleDeleteVariable(record.id)}
             size="small"
           >
-            Delete
+            {t('deleteButton')}
           </Button>
         </Space>
       ),
@@ -96,48 +96,48 @@ export default function VariablesPage() {
       <Card className={styles.card}>
         <div className={styles.header}>
           <Typography.Title level={2} className={styles.title}>
-            Variables
+            {t('title')}
           </Typography.Title>
           <p>
-            Manage your environment variables for API requests. Use{' '}
-            <code>{'{{variableName}}'}</code> format in your requests.
+            {t('description')} <code>{'{{variableName}}'}</code>{' '}
+            {t('formatHint')}
           </p>
         </div>
 
-        <div className={styles.addSection}>
-          <Typography.Title level={3}>Add New Variable</Typography.Title>
-          <Space.Compact className={styles.inputGroup}>
+        <div className={styles['add-section']}>
+          <Typography.Title level={3}>{t('addNew')}</Typography.Title>
+          <Space.Compact className={styles['input-group']}>
             <Input
-              placeholder="Variable name (e.g., api_key)"
+              placeholder={t('namePlaceholder')}
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
-              className={styles.nameInput}
+              className={styles['name-input']}
             />
             <Input
-              placeholder="Variable value"
+              placeholder={t('valuePlaceholder')}
               value={newValue}
               onChange={(e) => setNewValue(e.target.value)}
-              className={styles.valueInput}
+              className={styles['value-input']}
             />
             <Button
               type="primary"
               icon={<PlusOutlined />}
               onClick={handleAddVariable}
-              className={styles.addButton}
+              className={styles['add-button']}
             >
-              Add
+              {t('addButton')}
             </Button>
           </Space.Compact>
         </div>
 
-        <div className={styles.listSection}>
-          <Typography.Title level={3}>Your Variables</Typography.Title>
+        <div className={styles['list-section']}>
+          <Typography.Title level={3}>{t('yourVariables')}</Typography.Title>
           <Table
             columns={columns}
             dataSource={variables}
             rowKey="id"
             pagination={false}
-            locale={{ emptyText: 'No variables added yet' }}
+            locale={{ emptyText: t('noVariables') }}
           />
         </div>
       </Card>

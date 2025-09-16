@@ -79,5 +79,24 @@
     "inputError": "URL is required"
   },
   "HistoryPage": {},
-  "VariablesPage": {}
+  "VariablesPage": {
+    "title": "Variables",
+    "description": "Manage your environment variables for API requests.",
+    "formatHint": "format in your requests.",
+    "addNew": "Add New Variable",
+    "yourVariables": "Your Variables",
+    "nameColumn": "Name",
+    "valueColumn": "Value",
+    "actionsColumn": "Actions",
+    "namePlaceholder": "Variable name (e.g., api_key)",
+    "valuePlaceholder": "Variable value",
+    "addButton": "Add",
+    "deleteButton": "Delete",
+    "nameValueRequired": "Name and value are required",
+    "invalidName": "Variable name can only contain letters, numbers, and underscores, and cannot start with a number",
+    "duplicateName": "Variable with this name already exists",
+    "addSuccess": "Variable added successfully",
+    "deleteSuccess": "Variable deleted successfully",
+    "noVariables": "No variables added yet"
+  }
 }

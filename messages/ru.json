@@ -79,5 +79,24 @@
     "inputError": "URL обязателен для заполнения"
   },
   "HistoryPage": {},
-  "VariablesPage": {}
+  "VariablesPage": {
+    "title": "Переменные",
+    "description": "Управляйте переменными окружения для API запросов.",
+    "formatHint": "- формат для запросов.",
+    "addNew": "Добавить новую переменную",
+    "yourVariables": "Ваши переменные",
+    "nameColumn": "Имя",
+    "valueColumn": "Значение",
+    "actionsColumn": "Действия",
+    "namePlaceholder": "Имя переменной (например, api_key)",
+    "valuePlaceholder": "Значение переменной",
+    "addButton": "Добавить",
+    "deleteButton": "Удалить",
+    "nameValueRequired": "Имя и значение обязательны",
+    "invalidName": "Имя переменной может содержать только буквы, цифры и подчеркивания, и не может начинаться с цифры",
+    "duplicateName": "Переменная с таким именем уже существует",
+    "addSuccess": "Переменная успешно добавлена",
+    "deleteSuccess": "Переменная успешно удалена",
+    "noVariables": "Переменные еще не добавлены"
+  }
 }

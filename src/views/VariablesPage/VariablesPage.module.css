@@ -1,7 +1,7 @@
 .section {
   display: flex;
   width: 80vw;
-  margin: 0px auto;
+  margin: 0 auto;
 }
 
 .card {
@@ -18,30 +18,46 @@
 .title {
   display: flex;
   width: fit-content;
-  margin: 0px auto 10px auto;
+  margin: 0 auto 10px auto;
   color: #1890ff !important;
 }
 
-.addSection {
+.add-section {
   margin-bottom: 30px;
 }
 
-.inputGroup {
+.input-group {
   width: 100%;
-  display: grid;
-  grid-template-columns: 1fr 1fr 120px;
+  display: flex;
   gap: 8px;
 }
 
-.nameInput,
-.valueInput {
-  width: 100%;
+.name-input,
+.value-input {
+  flex: 1;
+  min-width: 0;
 }
 
-.addButton {
-  width: 100%;
+.add-button {
+  width: 120px;
+  flex-shrink: 0;
 }
 
-.listSection {
+.list-section {
   margin-top: 20px;
+}
+
+@media (width <= 768px) {
+  .section {
+    width: 95vw;
+  }
+
+  .input-group {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .add-button {
+    width: 100%;
+  }
 }

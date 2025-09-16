@@ -1,0 +1,10 @@
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50vh;
+}
+
+.loading-icon {
+  font-size: 48px;
+}
