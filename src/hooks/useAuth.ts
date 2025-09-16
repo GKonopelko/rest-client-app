@@ -5,7 +5,6 @@ import { getAuth, onIdTokenChanged } from 'firebase/auth';
 import { useDispatch } from 'react-redux';
 import { setUser, removeUser, setUserToken } from '@/slices/userSlice';
 import { app } from '@/lib/firebase/firebase';
-import { loadVariablesFromStorage } from '@/utils/variablesUtils';
 
 export const useAuth = () => {
   const dispatch = useDispatch();
@@ -31,9 +30,6 @@ export const useAuth = () => {
             refreshToken: user.refreshToken,
           })
         );
-
-        const variables = loadVariablesFromStorage();
-        console.log('Variables loaded after authentication:', variables);
       } else {
         dispatch(removeUser());
       }
@@ -52,9 +48,6 @@ export const useAuth = () => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ token }),
           });
-
-          const variables = loadVariablesFromStorage();
-          console.log('Variables reloaded after token refresh:', variables);
         }
       },
       50 * 60 * 1000
