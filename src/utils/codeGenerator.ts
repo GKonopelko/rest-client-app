@@ -6,6 +6,15 @@ export function generateCode(
   body: string
 ): string {
   try {
+    const variablePattern = /\{\{[^}]+\}\}/;
+    if (
+      variablePattern.test(url) ||
+      variablePattern.test(JSON.stringify(headers)) ||
+      variablePattern.test(body)
+    ) {
+      return 'Error: Unresolved variables detected in request parameters. Please make sure all variables are defined.';
+    }
+
     switch (language) {
       case 'curl':
         return generateCurlCode(method, url, headers, body);
@@ -37,6 +46,15 @@ function generateCurlCode(
   headers: Record<string, string>,
   body: string
 ): string {
+  const variablePattern = /\{\{[^}]+\}\}/;
+  if (
+    variablePattern.test(url) ||
+    variablePattern.test(JSON.stringify(headers)) ||
+    variablePattern.test(body)
+  ) {
+    return 'Error: Unresolved variables detected in request parameters';
+  }
+
   let command = `curl -X ${method}`;
 
   Object.entries(headers).forEach(([key, value]) => {
@@ -58,6 +76,15 @@ function generateJavascriptFetchCode(
   headers: Record<string, string>,
   body: string
 ): string {
+  const variablePattern = /\{\{[^}]+\}\}/;
+  if (
+    variablePattern.test(url) ||
+    variablePattern.test(JSON.stringify(headers)) ||
+    variablePattern.test(body)
+  ) {
+    return 'Error: Unresolved variables detected in request parameters';
+  }
+
   let code = `fetch('${url}', {\n  method: '${method}'`;
 
   if (Object.keys(headers).length > 0) {
@@ -87,6 +114,15 @@ function generateJavascriptXHRCode(
   headers: Record<string, string>,
   body: string
 ): string {
+  const variablePattern = /\{\{[^}]+\}\}/;
+  if (
+    variablePattern.test(url) ||
+    variablePattern.test(JSON.stringify(headers)) ||
+    variablePattern.test(body)
+  ) {
+    return 'Error: Unresolved variables detected in request parameters';
+  }
+
   let code = 'const xhr = new XMLHttpRequest();\n';
   code += `xhr.open('${method}', '${url}');\n`;
 
@@ -115,6 +151,15 @@ function generateNodeJSCode(
   headers: Record<string, string>,
   body: string
 ): string {
+  const variablePattern = /\{\{[^}]+\}\}/;
+  if (
+    variablePattern.test(url) ||
+    variablePattern.test(JSON.stringify(headers)) ||
+    variablePattern.test(body)
+  ) {
+    return 'Error: Unresolved variables detected in request parameters';
+  }
+
   let code = `const https = require('https');\n\n`;
   code += `const options = {\n`;
   code += `  method: '${method}',\n`;
@@ -146,6 +191,15 @@ function generatePythonCode(
   headers: Record<string, string>,
   body: string
 ): string {
+  const variablePattern = /\{\{[^}]+\}\}/;
+  if (
+    variablePattern.test(url) ||
+    variablePattern.test(JSON.stringify(headers)) ||
+    variablePattern.test(body)
+  ) {
+    return 'Error: Unresolved variables detected in request parameters';
+  }
+
   let code = `import requests\n\n`;
   code += `url = '${url}'\n`;
   code += `headers = ${JSON.stringify(headers, null, 2)}\n\n`;
@@ -166,6 +220,15 @@ function generateJavaCode(
   headers: Record<string, string>,
   body: string
 ): string {
+  const variablePattern = /\{\{[^}]+\}\}/;
+  if (
+    variablePattern.test(url) ||
+    variablePattern.test(JSON.stringify(headers)) ||
+    variablePattern.test(body)
+  ) {
+    return 'Error: Unresolved variables detected in request parameters';
+  }
+
   let code = `import java.net.HttpURLConnection;\n`;
   code += `import java.net.URL;\n`;
   code += `import java.io.OutputStream;\n`;
@@ -212,6 +275,15 @@ function generateCSharpCode(
   headers: Record<string, string>,
   body: string
 ): string {
+  const variablePattern = /\{\{[^}]+\}\}/;
+  if (
+    variablePattern.test(url) ||
+    variablePattern.test(JSON.stringify(headers)) ||
+    variablePattern.test(body)
+  ) {
+    return 'Error: Unresolved variables detected in request parameters';
+  }
+
   let code = `using System;\n`;
   code += `using System.Net.Http;\n`;
   code += `using System.Threading.Tasks;\n\n`;
@@ -247,6 +319,15 @@ function generateGoCode(
   headers: Record<string, string>,
   body: string
 ): string {
+  const variablePattern = /\{\{[^}]+\}\}/;
+  if (
+    variablePattern.test(url) ||
+    variablePattern.test(JSON.stringify(headers)) ||
+    variablePattern.test(body)
+  ) {
+    return 'Error: Unresolved variables detected in request parameters';
+  }
+
   let code = `package main\n\n`;
   code += `import (\n`;
   code += `    "bytes"\n`;

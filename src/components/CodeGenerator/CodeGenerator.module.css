@@ -6,7 +6,7 @@
   padding: 16px;
 }
 
-.modalContent {
+.modal-content {
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -17,13 +17,20 @@
   margin-bottom: 8px;
 }
 
-.codeTitle {
+.code-title {
   margin: 0 !important;
   font-weight: 500;
 }
 
-.textArea {
+.text-area {
   font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
   font-size: 12px;
   line-height: 1.5;
+}
+
+.loading-indicator {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100px;
 }

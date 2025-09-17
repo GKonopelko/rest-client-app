@@ -22,7 +22,7 @@ export const encodeRequestToUrl = (
 
     const queryParams = new URLSearchParams();
     Object.entries(headers || {}).forEach(([key, value]) => {
-      if (key && value && key !== 'Content-Type') {
+      if (key && value) {
         queryParams.append(key, encodeURIComponent(value));
       }
     });
@@ -61,14 +61,8 @@ export const decodeRequestFromUrl = (
     const headers: Record<string, string> = {};
     if (searchParams) {
       searchParams.forEach((value, key) => {
-        if (key !== 'Content-Type') {
-          headers[key] = decodeURIComponent(value);
-        }
+        headers[key] = decodeURIComponent(value);
       });
-    }
-
-    if (!headers['Content-Type']) {
-      headers['Content-Type'] = 'application/json';
     }
 
     return { method, url, headers, body };

@@ -1,9 +1,15 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Modal, Button, Select, Input, Typography } from 'antd';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Modal, Button, Select, Input, Typography, message } from 'antd';
 import { CodeOutlined } from '@ant-design/icons';
 import { generateCode } from '@/utils/codeGenerator';
+import {
+  interpolateVariables,
+  loadVariablesFromStorage,
+  extractVariableNames,
+  Variable,
+} from '@/utils/variablesUtils';
 import styles from './CodeGenerator.module.css';
 
 const { Option } = Select;
@@ -15,6 +21,7 @@ interface CodeGeneratorProps {
   url: string;
   headers: string;
   body: string;
+  variables?: Variable[];
 }
 
 const codeLanguages = [
@@ -33,34 +40,83 @@ export default function CodeGenerator({
   url,
   headers,
   body,
+  variables: externalVariables = [],
 }: CodeGeneratorProps) {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [generatedCode, setGeneratedCode] = useState('');
   const [selectedLanguage, setSelectedLanguage] = useState('curl');
+  const [variables, setVariables] = useState<Variable[]>(externalVariables);
+  const [loading, setLoading] = useState(false);
 
-  const handleGenerateCode = () => {
+  useEffect(() => {
+    if (externalVariables.length === 0) {
+      const savedVariables = loadVariablesFromStorage();
+      setVariables(savedVariables);
+    } else {
+      setVariables(externalVariables);
+    }
+  }, [externalVariables]);
+
+  const handleGenerateCode = useCallback(() => {
     try {
+      setLoading(true);
+
       let parsedHeaders = {};
       try {
         parsedHeaders = JSON.parse(headers || '{}');
       } catch {
-        console.error('Invalid JSON in headers');
+        message.error('Invalid JSON in headers');
+        return;
+      }
+
+      const interpolatedUrl = interpolateVariables(url, variables);
+      const interpolatedHeaders = interpolateVariables(
+        JSON.stringify(parsedHeaders),
+        variables
+      );
+      const interpolatedBody = interpolateVariables(body, variables);
+
+      const unresolvedVars = [
+        ...extractVariableNames(interpolatedUrl),
+        ...extractVariableNames(interpolatedHeaders),
+        ...extractVariableNames(interpolatedBody),
+      ];
+
+      if (unresolvedVars.length > 0) {
+        message.error(`Unresolved variables: ${unresolvedVars.join(', ')}`);
+        return;
+      }
+
+      let finalHeaders = {};
+      try {
+        finalHeaders = JSON.parse(interpolatedHeaders || '{}');
+      } catch {
+        message.error('Invalid JSON in headers after variable interpolation');
         return;
       }
 
       const code = generateCode(
         selectedLanguage,
         method,
-        url,
-        parsedHeaders,
-        body
+        interpolatedUrl,
+        finalHeaders,
+        interpolatedBody
       );
       setGeneratedCode(code);
       setIsModalVisible(true);
     } catch (error) {
       console.error('Error generating code:', error);
+      message.error('Failed to generate code');
+    } finally {
+      setLoading(false);
     }
-  };
+  }, [method, url, headers, body, variables, selectedLanguage]);
+
+  useEffect(() => {
+    if (isModalVisible) {
+      handleGenerateCode();
+    }
+  }, [method, url, headers, body, isModalVisible, handleGenerateCode]);
 
   const handleLanguageChange = (value: string) => {
     setSelectedLanguage(value);
@@ -73,6 +129,7 @@ export default function CodeGenerator({
         icon={<CodeOutlined />}
         onClick={handleGenerateCode}
         className={styles.button}
+        loading={loading}
       >
         Generate Code
       </Button>
@@ -89,7 +146,7 @@ export default function CodeGenerator({
         width={800}
         className={styles.modal}
       >
-        <div className={styles.modalContent}>
+        <div className={styles['modal-content']}>
           <Select
             value={selectedLanguage}
             onChange={handleLanguageChange}
@@ -102,7 +159,7 @@ export default function CodeGenerator({
             ))}
           </Select>
 
-          <Title level={5} className={styles.codeTitle}>
+          <Title level={5} className={styles['code-title']}>
             Code for {method} request:
           </Title>
 
@@ -110,7 +167,7 @@ export default function CodeGenerator({
             value={generatedCode}
             readOnly
             rows={15}
-            className={styles.textArea}
+            className={styles['text-area']}
           />
         </div>
       </Modal>
