@@ -1,0 +1,20 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 50vh;
+  gap: 16px;
+}
+
+.icon {
+  color: #1890ff;
+  font-size: 48px;
+}
+
+.message {
+  color: #666;
+  margin: 0;
+  font-size: 16px;
+  text-align: center;
+}
