@@ -44,8 +44,8 @@ export const decodeRequestFromUrl = (
   }
 
   const pathParts = pathname.split('/');
-
   const restClientIndex = pathParts.findIndex((part) => part === 'rest-client');
+
   if (restClientIndex === -1 || pathParts.length < restClientIndex + 3) {
     return null;
   }
