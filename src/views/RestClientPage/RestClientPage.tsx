@@ -14,13 +14,14 @@ import {
   extractVariableNames,
 } from '@/utils/variablesUtils';
 import CodeGenerator from '@/components/CodeGenerator/CodeGenerator';
-import {
-  encodeRequestToUrl,
-  decodeRequestFromUrl,
-  headersObjectToString,
-  headersStringToObject,
-} from '@/utils/urlEncoding';
+import { encodeRequestToUrl, decodeRequestFromUrl } from '@/utils/urlEncoding';
 import JsonEditor from '@/components/JsonEditor/JsonEditor';
+import HeadersEditor from '@/components/HeadersEditor/HeadersEditor';
+import {
+  Header as HeaderType,
+  headersArrayToObject,
+  headersObjectToArray,
+} from '@/utils/headersUtils';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -47,9 +48,7 @@ export default function RestClientPage() {
 
   const [method, setMethod] = useState(routeMethod);
   const [url, setUrl] = useState('');
-  const [headers, setHeaders] = useState(
-    '{\n  "Content-Type": "application/json"\n}'
-  );
+  const [headers, setHeaders] = useState<HeaderType[]>([]);
   const [body, setBody] = useState('');
   const [response, setResponse] = useState('');
   const [responseStatus, setResponseStatus] = useState('');
@@ -70,7 +69,7 @@ export default function RestClientPage() {
     if (decodedRequest) {
       setMethod(decodedRequest.method);
       setUrl(decodedRequest.url);
-      setHeaders(headersObjectToString(decodedRequest.headers));
+      setHeaders(headersObjectToArray(decodedRequest.headers));
       setBody(decodedRequest.body);
     }
 
@@ -82,7 +81,7 @@ export default function RestClientPage() {
       return;
 
     try {
-      const headersObj = headersStringToObject(headers);
+      const headersObj = headersArrayToObject(headers);
       const encodedUrl = encodeRequestToUrl(method, url, headersObj, body);
       router.push(encodedUrl);
     } catch (error) {
@@ -125,8 +124,12 @@ export default function RestClientPage() {
       setResponseTime('');
       setResponseSize('');
 
+      const headersObj = headersArrayToObject(headers);
       const interpolatedUrl = interpolateVariables(requestUrl, variables);
-      const interpolatedHeaders = interpolateVariables(headers, variables);
+      const interpolatedHeaders = interpolateVariables(
+        JSON.stringify(headersObj),
+        variables
+      );
       const interpolatedBody = interpolateVariables(body, variables);
 
       const unresolvedVars = [
@@ -192,8 +195,8 @@ export default function RestClientPage() {
     scheduleUrlUpdate();
   };
 
-  const handleHeadersChange = (value: string) => {
-    setHeaders(value);
+  const handleHeadersChange = (newHeaders: HeaderType[]) => {
+    setHeaders(newHeaders);
     scheduleUrlUpdate();
   };
 
@@ -252,7 +255,7 @@ export default function RestClientPage() {
             <CodeGenerator
               method={method}
               url={url}
-              headers={headers}
+              headers={JSON.stringify(headersArrayToObject(headers))}
               body={body}
             />
           </Space.Compact>
@@ -261,12 +264,8 @@ export default function RestClientPage() {
         <div className={styles.panels}>
           <div className={styles['panel-row']}>
             <div className={styles.panel}>
-              <Title level={4}>Headers (JSON)</Title>
-              <JsonEditor
-                value={headers}
-                onChange={handleHeadersChange}
-                height="200px"
-              />
+              <Title level={4}>Headers</Title>
+              <HeadersEditor headers={headers} onChange={handleHeadersChange} />
             </div>
 
             <div className={styles.panel}>
@@ -311,7 +310,9 @@ export default function RestClientPage() {
           <Text type="secondary">
             Available variables: {availableVariables}
           </Text>
-          {hasVariables(url) || hasVariables(headers) || hasVariables(body) ? (
+          {hasVariables(url) ||
+          hasVariables(JSON.stringify(headersArrayToObject(headers))) ||
+          hasVariables(body) ? (
             <div className={styles['warning-text']}>
               <Text type="warning">
                 Contains variables that will be interpolated

@@ -61,8 +61,14 @@ export const decodeRequestFromUrl = (
     const headers: Record<string, string> = {};
     if (searchParams) {
       searchParams.forEach((value, key) => {
-        headers[key] = decodeURIComponent(value);
+        if (key !== 'Content-Type') {
+          headers[key] = decodeURIComponent(value);
+        }
       });
+    }
+
+    if (!headers['Content-Type']) {
+      headers['Content-Type'] = 'application/json';
     }
 
     return { method, url, headers, body };
