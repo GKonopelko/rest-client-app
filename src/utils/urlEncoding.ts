@@ -1,77 +1,89 @@
-interface RequestData {
+export interface RequestData {
   method: string;
   url: string;
   headers: Record<string, string>;
   body: string;
 }
 
-function isValidBase64(str: string): boolean {
-  const base64Regex =
-    /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/;
-  return base64Regex.test(str);
-}
-
-export function encodeRequestToUrl(
+export const encodeRequestToUrl = (
   method: string,
   url: string,
   headers: Record<string, string>,
   body: string
-): string {
+): string => {
   try {
-    const requestData = { method, url, headers, body };
-    const jsonString = JSON.stringify(requestData);
-    const base64String = btoa(unescape(encodeURIComponent(jsonString)));
-    return `/rest-client?data=${base64String}`;
+    const encodedUrl = btoa(encodeURIComponent(url || ''));
+    const encodedBody = body ? btoa(encodeURIComponent(body)) : '';
+
+    let path = `/rest-client/${method}/${encodedUrl}`;
+    if (encodedBody) {
+      path += `/${encodedBody}`;
+    }
+
+    const queryParams = new URLSearchParams();
+    Object.entries(headers || {}).forEach(([key, value]) => {
+      if (key && value && key !== 'Content-Type') {
+        queryParams.append(key, encodeURIComponent(value));
+      }
+    });
+
+    const queryString = queryParams.toString();
+    return queryString ? `${path}?${queryString}` : path;
   } catch (error) {
-    console.error('Error encoding request to URL:', error);
-    return '/rest-client';
+    console.error('Error encoding URL:', error);
+    return `/rest-client/${method}`;
   }
-}
+};
 
-export function decodeRequestFromUrl(
-  searchParams: URLSearchParams
-): RequestData | null {
-  try {
-    const data = searchParams.get('data');
-
-    if (!data) {
-      console.warn("No 'data' parameter found in URL.");
-      return null;
-    }
-
-    if (!isValidBase64(data)) {
-      console.error('Invalid Base64 string found:', data);
-      return null;
-    }
-
-    try {
-      const decodedString = atob(data);
-      const json = JSON.parse(decodedString) as RequestData;
-      return json;
-    } catch (base64Error) {
-      console.error('Error decoding Base64 string:', base64Error);
-      return null;
-    }
-  } catch (error) {
-    console.error('Error decoding URL:', error);
+export const decodeRequestFromUrl = (
+  pathname: string | null,
+  searchParams: URLSearchParams | null
+): RequestData | null => {
+  if (!pathname || !pathname.includes('/rest-client/')) {
     return null;
   }
-}
 
-export function headersObjectToString(headers: Record<string, string>): string {
-  try {
-    return JSON.stringify(headers, null, 2);
-  } catch {
-    return '{}';
+  const pathParts = pathname.split('/');
+
+  const restClientIndex = pathParts.findIndex((part) => part === 'rest-client');
+  if (restClientIndex === -1 || pathParts.length < restClientIndex + 3) {
+    return null;
   }
-}
 
-export function headersStringToObject(
+  const method = pathParts[restClientIndex + 1];
+  const encodedUrl = pathParts[restClientIndex + 2];
+  const encodedBody = pathParts[restClientIndex + 3] || '';
+
+  try {
+    const url = encodedUrl ? decodeURIComponent(atob(encodedUrl)) : '';
+    const body = encodedBody ? decodeURIComponent(atob(encodedBody)) : '';
+
+    const headers: Record<string, string> = {};
+    if (searchParams) {
+      searchParams.forEach((value, key) => {
+        headers[key] = decodeURIComponent(value);
+      });
+    }
+
+    return { method, url, headers, body };
+  } catch (error) {
+    console.error('Error decoding URL:', error);
+    return { method, url: '', headers: {}, body: '' };
+  }
+};
+
+export const headersObjectToString = (
+  headers: Record<string, string>
+): string => {
+  return JSON.stringify(headers, null, 2);
+};
+
+export const headersStringToObject = (
   headersString: string
-): Record<string, string> {
+): Record<string, string> => {
   try {
     return JSON.parse(headersString || '{}');
   } catch {
     return {};
   }
-}
+};

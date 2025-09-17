@@ -42,8 +42,10 @@ export default function RestClientPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const urlParts = pathname?.split('/') ?? [];
-  const [method, setMethod] = useState(urlParts[3] ?? 'GET');
+  const pathParts = pathname?.split('/') ?? [];
+  const routeMethod = methods.includes(pathParts[3]) ? pathParts[3] : 'GET';
+
+  const [method, setMethod] = useState(routeMethod);
   const [url, setUrl] = useState('');
   const [headers, setHeaders] = useState(
     '{\n  "Content-Type": "application/json"\n}'
@@ -58,7 +60,7 @@ export default function RestClientPage() {
     const savedVariables = loadVariablesFromStorage();
     setVariables(savedVariables);
 
-    const decodedRequest = decodeRequestFromUrl(searchParams);
+    const decodedRequest = decodeRequestFromUrl(pathname, searchParams);
     if (decodedRequest) {
       setMethod(decodedRequest.method);
       setUrl(decodedRequest.url);
@@ -74,7 +76,7 @@ export default function RestClientPage() {
       const headersObj = headersStringToObject(headers);
       const encodedUrl = encodeRequestToUrl(method, url, headersObj, body);
 
-      router.push(encodedUrl, { scroll: false });
+      router.push(encodedUrl);
     } catch (error) {
       console.error('Error updating URL:', error);
     }
@@ -149,6 +151,25 @@ ${responseData}`;
     }
   };
 
+  const handleMethodChange = (value: string) => {
+    setMethod(value);
+    const headersObj = headersStringToObject(headers);
+    const encodedUrl = encodeRequestToUrl(value, url, headersObj, body);
+    router.push(encodedUrl);
+  };
+
+  const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setUrl(e.target.value);
+  };
+
+  const handleHeadersChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setHeaders(e.target.value);
+  };
+
+  const handleBodyChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setBody(e.target.value);
+  };
+
   const availableVariables =
     variables.map((v) => `{{${v.name}}}`).join(', ') || 'None';
 
@@ -165,7 +186,7 @@ ${responseData}`;
             <Select
               className={styles.select}
               value={method}
-              onChange={(value) => setMethod(value)}
+              onChange={handleMethodChange}
             >
               {methods.map((elem) => (
                 <Option key={elem} value={elem}>
@@ -177,7 +198,7 @@ ${responseData}`;
               className={styles['url-input']}
               placeholder={t('urlPlaceholder')}
               value={url}
-              onChange={(e) => setUrl(e.target.value)}
+              onChange={handleUrlChange}
             />
             <Button
               type="primary"
@@ -203,7 +224,7 @@ ${responseData}`;
               <Title level={4}>Headers (JSON)</Title>
               <TextArea
                 value={headers}
-                onChange={(e) => setHeaders(e.target.value)}
+                onChange={handleHeadersChange}
                 rows={6}
                 placeholder='{"Content-Type": "application/json"}'
                 className={styles['text-area']}
@@ -214,7 +235,7 @@ ${responseData}`;
               <Title level={4}>Body</Title>
               <TextArea
                 value={body}
-                onChange={(e) => setBody(e.target.value)}
+                onChange={handleBodyChange}
                 rows={8}
                 placeholder='{"key": "value"}'
                 className={styles['text-area']}
