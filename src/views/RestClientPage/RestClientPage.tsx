@@ -1,17 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
-import {
-  Card,
-  Typography,
-  Space,
-  Input,
-  Button,
-  Select,
-  Form,
-  message,
-} from 'antd';
+import React, { useState, useEffect, useCallback } from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { Card, Typography, Space, Input, Button, Select, message } from 'antd';
 import { SendOutlined } from '@ant-design/icons';
 import styles from './RestClient.module.css';
 import { useTranslations } from 'next-intl';
@@ -22,11 +13,13 @@ import {
   hasVariables,
   extractVariableNames,
 } from '@/utils/variablesUtils';
-
-interface RequestData {
-  method: string;
-  url: string;
-}
+import CodeGenerator from '@/components/CodeGenerator/CodeGenerator';
+import {
+  encodeRequestToUrl,
+  decodeRequestFromUrl,
+  headersObjectToString,
+  headersStringToObject,
+} from '@/utils/urlEncoding';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -46,6 +39,9 @@ const methods: string[] = [
 
 export default function RestClientPage() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
   const urlParts = pathname?.split('/') ?? [];
   const [method, setMethod] = useState(urlParts[3] ?? 'GET');
   const [url, setUrl] = useState('');
@@ -58,21 +54,36 @@ export default function RestClientPage() {
   const [variables, setVariables] = useState<Variable[]>([]);
   const t = useTranslations('RestClientPage');
 
-  const router = useRouter();
-
   useEffect(() => {
     const savedVariables = loadVariablesFromStorage();
     setVariables(savedVariables);
-  }, []);
 
-  const onFinish = (data: RequestData) => {
-    if (!urlParts) return;
-    if (urlParts.length >= 3) {
-      router?.push(`/${urlParts[2]}/${data.method}`);
-    } else {
-      router?.push(`${pathname}/${data.method}`);
+    const decodedRequest = decodeRequestFromUrl(searchParams);
+    if (decodedRequest) {
+      setMethod(decodedRequest.method);
+      setUrl(decodedRequest.url);
+      setHeaders(headersObjectToString(decodedRequest.headers));
+      setBody(decodedRequest.body);
     }
-  };
+  }, [pathname, searchParams]);
+
+  const updateUrlWithCurrentState = useCallback(() => {
+    try {
+      if (!url.trim()) return;
+
+      const headersObj = headersStringToObject(headers);
+      const encodedUrl = encodeRequestToUrl(method, url, headersObj, body);
+
+      router.push(encodedUrl, { scroll: false });
+    } catch (error) {
+      console.error('Error updating URL:', error);
+    }
+  }, [method, url, headers, body, router]);
+
+  useEffect(() => {
+    const timeoutId = setTimeout(updateUrlWithCurrentState, 500);
+    return () => clearTimeout(timeoutId);
+  }, [updateUrlWithCurrentState]);
 
   const handleSendRequest = async () => {
     if (!url.trim()) {
@@ -148,42 +159,43 @@ ${responseData}`;
           {t('title')}
         </Title>
 
-        <Form className={styles.form} onFinish={onFinish}>
+        <div className={styles.form}>
           <Title level={3}>{t('request')}</Title>
           <Space.Compact className={styles['url-line']} size="large">
-            <Form.Item name="method" initialValue={method}>
-              <Select
-                className={styles.select}
-                value={method}
-                onChange={(value) => setMethod(value)}
-              >
-                {methods.map((elem) => (
-                  <Option key={elem} value={elem}>
-                    {elem}
-                  </Option>
-                ))}
-              </Select>
-            </Form.Item>
-            <Form.Item className={styles['url-wrapper']} name="url">
-              <Input
-                placeholder={t('urlPlaceholder')}
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-              />
-            </Form.Item>
-            <Form.Item>
-              <Button
-                type="primary"
-                icon={<SendOutlined />}
-                onClick={handleSendRequest}
-                loading={loading}
-                className={styles['submit-button']}
-              >
-                {t('submitButton')}
-              </Button>
-            </Form.Item>
+            <Select
+              className={styles.select}
+              value={method}
+              onChange={(value) => setMethod(value)}
+            >
+              {methods.map((elem) => (
+                <Option key={elem} value={elem}>
+                  {elem}
+                </Option>
+              ))}
+            </Select>
+            <Input
+              className={styles['url-input']}
+              placeholder={t('urlPlaceholder')}
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+            />
+            <Button
+              type="primary"
+              icon={<SendOutlined />}
+              onClick={handleSendRequest}
+              loading={loading}
+              className={styles['submit-button']}
+            >
+              {t('submitButton')}
+            </Button>
+            <CodeGenerator
+              method={method}
+              url={url}
+              headers={headers}
+              body={body}
+            />
           </Space.Compact>
-        </Form>
+        </div>
 
         <div className={styles.panels}>
           <div className={styles['panel-row']}>

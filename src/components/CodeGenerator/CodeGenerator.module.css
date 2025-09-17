@@ -1,0 +1,29 @@
+.button {
+  margin-left: 8px;
+}
+
+.modal :global(.ant-modal-body) {
+  padding: 16px;
+}
+
+.modalContent {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.select {
+  width: 200px;
+  margin-bottom: 8px;
+}
+
+.codeTitle {
+  margin: 0 !important;
+  font-weight: 500;
+}
+
+.textArea {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 12px;
+  line-height: 1.5;
+}
