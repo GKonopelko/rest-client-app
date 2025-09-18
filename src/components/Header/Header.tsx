@@ -2,55 +2,39 @@
 
 import Link from 'next/link';
 import styles from './styles.module.css';
-import { Button, Space, Grid } from 'antd';
+import { Button, Grid } from 'antd';
 import {
   LoginOutlined,
   UserAddOutlined,
-  GlobalOutlined,
   LogoutOutlined,
 } from '@ant-design/icons';
 import { Logo } from '../../components/Logo/Logo';
 import { useScrollDetection } from '../../hooks/useScrollDetection';
 import { useTranslations } from 'next-intl';
-import { useParams, useRouter, usePathname } from 'next/navigation';
-import { useSwitchLocale } from '@/hooks/useSwitchLocale';
+import { useRouter, usePathname } from 'next/navigation';
 import { useDispatch, useSelector } from 'react-redux';
 import { removeUser, selectUserName } from '@/slices/userSlice';
 import { RootState } from '@/store';
 import { getAuth, signOut } from 'firebase/auth';
+import LanguageSwitcher from '@/components/LanguageSwitcher/LanguageSwitcher';
 
 const { useBreakpoint } = Grid;
-
-const LANGUAGES = {
-  en: 'en',
-  ru: 'ru',
-};
 
 export default function Header() {
   const screens = useBreakpoint();
   const isScrolled = useScrollDetection();
-  const params = useParams();
   const router = useRouter();
   const pathname = usePathname();
   const dispatch = useDispatch();
   const userName = useSelector((state: RootState) => selectUserName(state));
   const t = useTranslations('AppLayout');
-  const currentLocale =
-    typeof params?.locale === 'string' ? params.locale : 'en';
-
-  const switchLocale = useSwitchLocale();
   const showText = screens.md;
-
-  const handleLocaleSwitch = (targetLocale: string) => {
-    switchLocale(currentLocale, targetLocale);
-  };
 
   const handleSignOut = async () => {
     const auth = getAuth();
 
     try {
       await signOut(auth);
-
       dispatch(removeUser());
 
       await fetch('/api/setToken', {
@@ -80,26 +64,7 @@ export default function Header() {
       </Link>
 
       <div className={styles.container}>
-        <Space.Compact>
-          <Button
-            type={currentLocale === LANGUAGES.en ? 'primary' : 'default'}
-            onClick={() => handleLocaleSwitch('en')}
-            icon={!showText ? <GlobalOutlined /> : undefined}
-            aria-label={t('localeEn')}
-            className={styles['locale-button']}
-          >
-            {showText ? t('localeEn') : ''}
-          </Button>
-          <Button
-            type={currentLocale === LANGUAGES.ru ? 'primary' : 'default'}
-            onClick={() => handleLocaleSwitch('ru')}
-            icon={!showText ? <GlobalOutlined /> : undefined}
-            aria-label={t('localeRu')}
-            className={styles['locale-button']}
-          >
-            {showText ? t('localeRu') : ''}
-          </Button>
-        </Space.Compact>
+        <LanguageSwitcher showText={showText} />
 
         {userName ? (
           <Button

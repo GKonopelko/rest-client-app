@@ -13,6 +13,11 @@ export const useRequestHandler = () => {
 
     try {
       const result = await executeRequest(request);
+
+      if (result.status === 0) {
+        throw new Error(result.body || 'Network connection failed');
+      }
+
       setResponse(result);
       return result;
     } catch (err) {

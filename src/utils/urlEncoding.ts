@@ -6,19 +6,34 @@ export interface RequestData {
 }
 
 const encodeUnicode = (str: string): string => {
-  return btoa(
-    encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (_match, p1) => {
-      return String.fromCharCode(parseInt(p1, 16));
-    })
-  );
+  try {
+    if (!str) return '';
+
+    return btoa(
+      encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (_match, p1) => {
+        return String.fromCharCode(parseInt(p1, 16));
+      })
+    );
+  } catch (error) {
+    console.error('Error encoding Unicode:', error);
+    return btoa(encodeURIComponent(''));
+  }
 };
 
 const decodeUnicode = (str: string): string => {
-  return decodeURIComponent(
-    Array.from(atob(str), (c) => {
-      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-    }).join('')
-  );
+  try {
+    if (!str) return '';
+
+    const decoded = atob(str);
+    return decodeURIComponent(
+      Array.from(decoded, (c) => {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join('')
+    );
+  } catch (error) {
+    console.error('Error decoding Unicode:', error);
+    return '';
+  }
 };
 
 export const encodeRequestToUrl = (
@@ -47,7 +62,8 @@ export const encodeRequestToUrl = (
     const queryParams = new URLSearchParams();
     Object.entries(headers || {}).forEach(([key, value]) => {
       if (key && value && key.trim() && value.trim()) {
-        queryParams.append(key.trim(), value.trim());
+        const encodedValue = encodeUnicode(value.trim());
+        queryParams.append(key.trim(), encodedValue);
       }
     });
 
@@ -87,7 +103,12 @@ export const decodeRequestFromUrl = (
     if (searchParams) {
       searchParams.forEach((value, key) => {
         if (key && value) {
-          headers[key] = value;
+          try {
+            headers[key] = decodeUnicode(value);
+          } catch (error) {
+            console.error(`Error decoding header ${key}:`, error);
+            headers[key] = value;
+          }
         }
       });
     }
@@ -102,6 +123,11 @@ export const decodeRequestFromUrl = (
 export const isValidBase64 = (str: string): boolean => {
   try {
     if (!str) return false;
+
+    if (str.length % 4 !== 0 || !/^[A-Za-z0-9+/]*={0,2}$/.test(str)) {
+      return false;
+    }
+
     const decoded = atob(str);
     return decoded.length > 0;
   } catch (_error) {
@@ -111,13 +137,18 @@ export const isValidBase64 = (str: string): boolean => {
 
 export const decodeUnicodeFromBase64 = (str: string): string => {
   try {
+    if (!str || !isValidBase64(str)) {
+      return '';
+    }
+
+    const decoded = atob(str);
     return decodeURIComponent(
-      Array.from(atob(str), (c) => {
+      Array.from(decoded, (c) => {
         return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
       }).join('')
     );
   } catch (error) {
-    console.error('Error decoding Unicode:', error);
+    console.error('Error decoding Unicode from Base64:', error);
     return '';
   }
 };
@@ -127,4 +158,128 @@ export const getCurrentUrl = (): string => {
     return window.location.pathname + window.location.search;
   }
   return '';
+};
+
+export const encodeRequestToSearchParams = (
+  method: string,
+  url: string,
+  headers: Record<string, string>,
+  body: string
+): URLSearchParams => {
+  const params = new URLSearchParams();
+
+  params.set('method', method);
+  if (url) params.set('url', encodeUnicode(url.trim()));
+  if (body.trim()) params.set('body', encodeUnicode(body.trim()));
+
+  Object.entries(headers || {}).forEach(([key, value]) => {
+    if (key && value && key.trim() && value.trim()) {
+      params.set(key.trim(), encodeUnicode(value.trim()));
+    }
+  });
+
+  return params;
+};
+
+export const decodeRequestFromSearchParams = (
+  searchParams: URLSearchParams
+): RequestData => {
+  const method = searchParams.get('method') || 'GET';
+  const encodedUrl = searchParams.get('url');
+  const encodedBody = searchParams.get('body');
+
+  let url = '';
+  let body = '';
+  const headers: Record<string, string> = {};
+
+  if (encodedUrl) {
+    try {
+      url = decodeUnicode(encodedUrl);
+    } catch (error) {
+      console.error('Error decoding URL:', error);
+    }
+  }
+
+  if (encodedBody) {
+    try {
+      body = decodeUnicode(encodedBody);
+    } catch (error) {
+      console.error('Error decoding body:', error);
+    }
+  }
+
+  searchParams.forEach((value, key) => {
+    if (key !== 'method' && key !== 'url' && key !== 'body' && value) {
+      try {
+        headers[key] = decodeUnicode(value);
+      } catch (error) {
+        console.error(`Error decoding header ${key}:`, error);
+        headers[key] = value;
+      }
+    }
+  });
+
+  return {
+    method,
+    url,
+    headers,
+    body,
+  };
+};
+
+export const createRestClientUrl = (
+  method: string,
+  url: string,
+  headers: Record<string, string>,
+  body: string,
+  locale: string = 'en'
+): string => {
+  const params = encodeRequestToSearchParams(method, url, headers, body);
+  return `/${locale}/rest-client?${params.toString()}`;
+};
+
+export const safeEncodeURIComponent = (str: string): string => {
+  try {
+    return encodeURIComponent(str);
+  } catch (error) {
+    console.error('Error encoding URI component:', error);
+    return '';
+  }
+};
+
+export const safeDecodeURIComponent = (str: string): string => {
+  try {
+    return decodeURIComponent(str);
+  } catch (error) {
+    console.error('Error decoding URI component:', error);
+    return str;
+  }
+};
+
+export const isUrlEncoded = (str: string): boolean => {
+  try {
+    return str !== decodeURIComponent(str);
+  } catch {
+    return false;
+  }
+};
+
+export const normalizeUrl = (url: string): string => {
+  try {
+    if (!url) return '';
+
+    let normalizedUrl = url.trim();
+
+    if (
+      !normalizedUrl.startsWith('http://') &&
+      !normalizedUrl.startsWith('https://')
+    ) {
+      normalizedUrl = 'https://' + normalizedUrl;
+    }
+
+    return normalizedUrl;
+  } catch (error) {
+    console.error('Error normalizing URL:', error);
+    return url;
+  }
 };
