@@ -1,34 +1,52 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useParams, useRouter, useSearchParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
+import RestClientPage from '@/views/RestClientPage/RestClientPage';
+import { isValidBase64, decodeUnicodeFromBase64 } from '@/utils/urlEncoding';
 
-export default function LegacyRestClientPage() {
+export default function RestClientHandlerPage() {
   const params = useParams();
-  const router = useRouter();
   const searchParams = useSearchParams();
 
-  useEffect(() => {
-    if (params?.params) {
-      const newPath = `/api-client/${(params.params as string[]).join('/')}`;
-      const queryString = searchParams.toString();
-      const fullPath = queryString ? `${newPath}?${queryString}` : newPath;
+  const pathParts = (params.params as string[]) || [];
+  const method = pathParts[0] || 'GET';
+  const encodedUrl = pathParts[1];
+  const encodedBody = pathParts[2];
 
-      router.replace(fullPath);
-    } else {
-      router.replace('/api-client/GET');
+  let decodedUrl = '';
+  let decodedBody = '';
+  const decodedHeaders: Record<string, string> = {};
+
+  if (encodedUrl && isValidBase64(encodedUrl)) {
+    try {
+      decodedUrl = decodeUnicodeFromBase64(encodedUrl);
+    } catch (error) {
+      console.error('Error decoding URL:', error);
     }
-  }, [params, searchParams, router]);
+  }
+
+  if (encodedBody && isValidBase64(encodedBody)) {
+    try {
+      decodedBody = decodeUnicodeFromBase64(encodedBody);
+    } catch (error) {
+      console.error('Error decoding body:', error);
+    }
+  }
+
+  if (searchParams) {
+    searchParams.forEach((value, key) => {
+      if (key && value) {
+        decodedHeaders[key] = value;
+      }
+    });
+  }
 
   return (
-    <div
-      style={{
-        padding: '20px',
-        textAlign: 'center',
-        fontFamily: 'Arial, sans-serif',
-      }}
-    >
-      <p>Redirecting to new API client interface...</p>
-    </div>
+    <RestClientPage
+      initialMethod={method}
+      initialUrl={decodedUrl}
+      initialBody={decodedBody}
+      initialHeaders={decodedHeaders}
+    />
   );
 }

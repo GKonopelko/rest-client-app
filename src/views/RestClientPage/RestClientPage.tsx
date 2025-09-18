@@ -1,12 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import {
-  usePathname,
-  useRouter,
-  useSearchParams,
-  useParams,
-} from 'next/navigation';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Card, Typography, Space, Input, Button, Select, message } from 'antd';
 import { SendOutlined } from '@ant-design/icons';
 import styles from './RestClient.module.css';
@@ -19,15 +13,14 @@ import {
   extractVariableNames,
 } from '@/utils/variablesUtils';
 import CodeGenerator from '@/components/CodeGenerator/CodeGenerator';
-import { encodeRequestToUrl, decodeRequestFromUrl } from '@/utils/urlEncoding';
 import JsonEditor from '@/components/JsonEditor/JsonEditor';
 import HeadersEditor from '@/components/HeadersEditor/HeadersEditor';
 import {
   Header as HeaderType,
   headersArrayToObject,
-  headersObjectToArray,
 } from '@/utils/headersUtils';
-import { useDebounce } from '@/hooks/useDebounce';
+import { useRouter, useParams } from 'next/navigation';
+import { encodeRequestToUrl } from '@/utils/urlEncoding';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -44,27 +37,23 @@ const methods: string[] = [
   'TRACE',
 ];
 
-export default function RestClientPage() {
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const params = useParams();
+interface RestClientPageProps {
+  initialMethod?: string;
+  initialUrl?: string;
+  initialBody?: string;
+  initialHeaders?: Record<string, string>;
+}
 
-  const isDynamicRoute = pathname?.includes('/api-client/');
-
-  let routeMethod = 'GET';
-  if (isDynamicRoute && params?.params) {
-    const methodFromParams = (params.params as string[])[0];
-    routeMethod = methods.includes(methodFromParams) ? methodFromParams : 'GET';
-  } else {
-    const pathParts = pathname?.split('/') ?? [];
-    routeMethod = methods.includes(pathParts[3]) ? pathParts[3] : 'GET';
-  }
-
-  const [method, setMethod] = useState(routeMethod);
-  const [url, setUrl] = useState('');
+export default function RestClientPage({
+  initialMethod = 'GET',
+  initialUrl = '',
+  initialBody = '',
+  initialHeaders = {},
+}: RestClientPageProps) {
+  const [method, setMethod] = useState(initialMethod);
+  const [url, setUrl] = useState(initialUrl);
   const [headers, setHeaders] = useState<HeaderType[]>([]);
-  const [body, setBody] = useState('');
+  const [body, setBody] = useState(initialBody);
   const [response, setResponse] = useState('');
   const [responseStatus, setResponseStatus] = useState('');
   const [responseTime, setResponseTime] = useState('');
@@ -72,73 +61,43 @@ export default function RestClientPage() {
   const [loading, setLoading] = useState(false);
   const [variables, setVariables] = useState<Variable[]>([]);
   const t = useTranslations('RestClientPage');
+  const router = useRouter();
+  const params = useParams();
+  const locale = params.locale as string;
 
-  const isInitialLoad = useRef(true);
   const isRequestInProgress = useRef(false);
-  const headersUpdateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isInitialMount = useRef(true);
 
-  const debouncedBody = useDebounce(body, 1000);
-  const debouncedHeaders = useDebounce(headers, 1000);
+  const updateUrl = useCallback(() => {
+    const headersObj = headersArrayToObject(headers);
+    const newUrl = encodeRequestToUrl(method, url, headersObj, body, locale);
+
+    router.replace(newUrl, { scroll: false });
+  }, [method, url, headers, body, locale, router]);
 
   useEffect(() => {
     const savedVariables = loadVariablesFromStorage();
     setVariables(savedVariables);
 
-    let decodedRequest;
-
-    if (isDynamicRoute && params?.params) {
-      const dynamicPathname = `/api-client/${(params.params as string[]).join('/')}`;
-      decodedRequest = decodeRequestFromUrl(dynamicPathname, searchParams);
-    } else {
-      decodedRequest = decodeRequestFromUrl(pathname, searchParams);
+    if (Object.keys(initialHeaders).length > 0) {
+      setHeaders(
+        Object.entries(initialHeaders).map(([key, value]) => ({
+          key,
+          value,
+        }))
+      );
     }
 
-    if (decodedRequest) {
-      setMethod(decodedRequest.method);
-      setUrl(decodedRequest.url);
-      setHeaders(headersObjectToArray(decodedRequest.headers));
-      setBody(decodedRequest.body);
-    }
-
-    isInitialLoad.current = false;
-  }, [pathname, searchParams, params, isDynamicRoute]);
-
-  const updateUrl = useCallback(() => {
-    if (isInitialLoad.current || !url.trim() || isRequestInProgress.current)
-      return;
-
-    try {
-      const headersObj = headersArrayToObject(headers);
-      const encodedUrl = encodeRequestToUrl(method, url, headersObj, body);
-
-      let targetPath = encodedUrl;
-      if (isDynamicRoute) {
-        targetPath = encodedUrl.replace('/rest-client/', '/api-client/');
-      }
-
-      router.push(targetPath);
-    } catch (error) {
-      console.error('Error updating URL:', error);
-    }
-  }, [method, url, headers, body, router, isDynamicRoute]);
-
-  const updateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  const scheduleUrlUpdate = useCallback(() => {
-    if (updateTimeoutRef.current) {
-      clearTimeout(updateTimeoutRef.current);
-    }
-
-    updateTimeoutRef.current = setTimeout(() => {
-      updateUrl();
-    }, 100);
-  }, [updateUrl]);
+    isInitialMount.current = false;
+  }, [initialMethod, initialUrl, initialBody, initialHeaders]);
 
   useEffect(() => {
-    if (!isInitialLoad.current) {
-      scheduleUrlUpdate();
-    }
-  }, [method, url, debouncedBody, debouncedHeaders, scheduleUrlUpdate]);
+    if (isInitialMount.current || isRequestInProgress.current) return;
+
+    const timeoutId = setTimeout(updateUrl, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [method, url, headers, body, updateUrl]);
 
   const handleSendRequest = async () => {
     if (!url.trim()) {
@@ -218,9 +177,9 @@ export default function RestClientPage() {
       setResponseStatus('Error');
     } finally {
       setLoading(false);
-      setTimeout(() => {
-        isRequestInProgress.current = false;
-      }, 100);
+      isRequestInProgress.current = false;
+
+      updateUrl();
     }
   };
 
@@ -239,20 +198,6 @@ export default function RestClientPage() {
   const handleBodyChange = (value: string) => {
     setBody(value);
   };
-
-  useEffect(() => {
-    const currentUpdateTimeout = updateTimeoutRef.current;
-    const currentHeadersTimeout = headersUpdateTimeoutRef.current;
-
-    return () => {
-      if (currentUpdateTimeout) {
-        clearTimeout(currentUpdateTimeout);
-      }
-      if (currentHeadersTimeout) {
-        clearTimeout(currentHeadersTimeout);
-      }
-    };
-  }, []);
 
   const availableVariables =
     variables.map((v) => `{{${v.name}}}`).join(', ') || 'None';

@@ -5,25 +5,49 @@ export interface RequestData {
   body: string;
 }
 
+const encodeUnicode = (str: string): string => {
+  return btoa(
+    encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (_match, p1) => {
+      return String.fromCharCode(parseInt(p1, 16));
+    })
+  );
+};
+
+const decodeUnicode = (str: string): string => {
+  return decodeURIComponent(
+    Array.from(atob(str), (c) => {
+      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join('')
+  );
+};
+
 export const encodeRequestToUrl = (
   method: string,
   url: string,
   headers: Record<string, string>,
-  body: string
+  body: string,
+  locale: string = 'en'
 ): string => {
   try {
-    const encodedUrl = btoa(encodeURIComponent(url || ''));
-    const encodedBody = body ? btoa(encodeURIComponent(body)) : '';
+    if (!url.trim()) {
+      return `/${locale}/rest-client/${method}`;
+    }
 
-    let path = `/rest-client/${method}/${encodedUrl}`;
+    const encodedUrl = encodeUnicode(url.trim());
+    const encodedBody = body.trim() ? encodeUnicode(body.trim()) : '';
+
+    let path = `/${locale}/rest-client/${method}`;
+    if (encodedUrl) {
+      path += `/${encodedUrl}`;
+    }
     if (encodedBody) {
       path += `/${encodedBody}`;
     }
 
     const queryParams = new URLSearchParams();
     Object.entries(headers || {}).forEach(([key, value]) => {
-      if (key && value) {
-        queryParams.append(key, encodeURIComponent(value));
+      if (key && value && key.trim() && value.trim()) {
+        queryParams.append(key.trim(), value.trim());
       }
     });
 
@@ -31,7 +55,7 @@ export const encodeRequestToUrl = (
     return queryString ? `${path}?${queryString}` : path;
   } catch (error) {
     console.error('Error encoding URL:', error);
-    return `/rest-client/${method}`;
+    return `/${locale}/rest-client/${method}`;
   }
 };
 
@@ -43,10 +67,11 @@ export const decodeRequestFromUrl = (
     return null;
   }
 
-  const pathParts = pathname.split('/');
+  const pathParts = pathname.split('/').filter((part) => part !== '');
+
   const restClientIndex = pathParts.findIndex((part) => part === 'rest-client');
 
-  if (restClientIndex === -1 || pathParts.length < restClientIndex + 3) {
+  if (restClientIndex === -1 || pathParts.length < restClientIndex + 2) {
     return null;
   }
 
@@ -55,35 +80,51 @@ export const decodeRequestFromUrl = (
   const encodedBody = pathParts[restClientIndex + 3] || '';
 
   try {
-    const url = encodedUrl ? decodeURIComponent(atob(encodedUrl)) : '';
-    const body = encodedBody ? decodeURIComponent(atob(encodedBody)) : '';
+    const url = encodedUrl ? decodeUnicode(encodedUrl) : '';
+    const body = encodedBody ? decodeUnicode(encodedBody) : '';
 
     const headers: Record<string, string> = {};
     if (searchParams) {
       searchParams.forEach((value, key) => {
-        headers[key] = decodeURIComponent(value);
+        if (key && value) {
+          headers[key] = value;
+        }
       });
     }
 
     return { method, url, headers, body };
   } catch (error) {
     console.error('Error decoding URL:', error);
-    return { method, url: '', headers: {}, body: '' };
+    return null;
   }
 };
 
-export const headersObjectToString = (
-  headers: Record<string, string>
-): string => {
-  return JSON.stringify(headers, null, 2);
-};
-
-export const headersStringToObject = (
-  headersString: string
-): Record<string, string> => {
+export const isValidBase64 = (str: string): boolean => {
   try {
-    return JSON.parse(headersString || '{}');
-  } catch {
-    return {};
+    if (!str) return false;
+    const decoded = atob(str);
+    return decoded.length > 0;
+  } catch (_error) {
+    return false;
   }
+};
+
+export const decodeUnicodeFromBase64 = (str: string): string => {
+  try {
+    return decodeURIComponent(
+      Array.from(atob(str), (c) => {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join('')
+    );
+  } catch (error) {
+    console.error('Error decoding Unicode:', error);
+    return '';
+  }
+};
+
+export const getCurrentUrl = (): string => {
+  if (typeof window !== 'undefined') {
+    return window.location.pathname + window.location.search;
+  }
+  return '';
 };
