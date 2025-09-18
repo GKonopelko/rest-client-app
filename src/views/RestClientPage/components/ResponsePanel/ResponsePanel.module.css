@@ -1,0 +1,11 @@
+.response-panel {
+  margin-top: 24px;
+}
+
+.response-info {
+  margin-bottom: 16px;
+}
+
+.response-info > * {
+  margin-right: 16px;
+}

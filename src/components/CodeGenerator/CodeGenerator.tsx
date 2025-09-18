@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Modal, Button, Select, Input, Typography, message } from 'antd';
 import { CodeOutlined } from '@ant-design/icons';
 import { generateCode } from '@/utils/codeGenerator';
@@ -45,17 +45,12 @@ export default function CodeGenerator({
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [generatedCode, setGeneratedCode] = useState('');
   const [selectedLanguage, setSelectedLanguage] = useState('curl');
-  const [variables, setVariables] = useState<Variable[]>(externalVariables);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (externalVariables.length === 0) {
-      const savedVariables = loadVariablesFromStorage();
-      setVariables(savedVariables);
-    } else {
-      setVariables(externalVariables);
-    }
-  }, [externalVariables]);
+  const variables =
+    externalVariables.length > 0
+      ? externalVariables
+      : loadVariablesFromStorage();
 
   const handleGenerateCode = useCallback(() => {
     try {
@@ -103,7 +98,6 @@ export default function CodeGenerator({
         interpolatedBody
       );
       setGeneratedCode(code);
-      setIsModalVisible(true);
     } catch (error) {
       console.error('Error generating code:', error);
       message.error('Failed to generate code');
@@ -112,11 +106,10 @@ export default function CodeGenerator({
     }
   }, [method, url, headers, body, variables, selectedLanguage]);
 
-  useEffect(() => {
-    if (isModalVisible) {
-      handleGenerateCode();
-    }
-  }, [method, url, headers, body, isModalVisible, handleGenerateCode]);
+  const handleOpenModal = () => {
+    setIsModalVisible(true);
+    handleGenerateCode();
+  };
 
   const handleLanguageChange = (value: string) => {
     setSelectedLanguage(value);
@@ -127,7 +120,7 @@ export default function CodeGenerator({
     <>
       <Button
         icon={<CodeOutlined />}
-        onClick={handleGenerateCode}
+        onClick={handleOpenModal}
         className={styles.button}
         loading={loading}
       >
