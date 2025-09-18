@@ -1,21 +1,24 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, memo, useRef } from 'react';
-import { Card, Typography, message } from 'antd';
+import React, { useState, useEffect, useCallback, memo } from 'react';
+import { Card, Typography, message, Spin } from 'antd';
+import { useTranslations } from 'next-intl';
 import styles from './RestClient.module.css';
 
 import RequestPanel from './components/RequestPanel/RequestPanel';
 import HeadersPanel from './components/HeadersPanel/HeadersPanel';
 import ResponsePanel from './components/ResponsePanel/ResponsePanel';
 import BodyPanel from './components/BodyPanel/BodyPanel';
+import VariablesInfo from './components/VariablesInfo/VariablesInfo';
 
 import { useRequestHandler } from './hooks/useRequestHandler';
+import { useVariables } from './hooks/useVariables';
+import { useUrlSync } from './hooks/useUrlSync';
 import { RequestData, Header } from './types';
 import {
   headersArrayToObject,
   headersObjectToArray,
 } from '@/utils/headersUtils';
-import { useUrlSync } from './hooks/useUrlSync';
 
 const { Title } = Typography;
 
@@ -35,65 +38,63 @@ const RestClientPage = memo(
     initialBody = '',
     initialHeaders = {},
   }: RestClientPageProps) => {
-    const isInitialized = useRef(false);
+    const [isMounted, setIsMounted] = useState(false);
+    const [request, setRequest] = useState<RequestData>({
+      method: 'GET',
+      url: '',
+      headers: {},
+      body: '',
+    });
+    const [headers, setHeaders] = useState<Header[]>([]);
 
-    const loadSavedRequest = (): RequestData => {
-      if (typeof window === 'undefined') {
+    const { response, isLoading, error, execute } = useRequestHandler();
+    const { variables } = useVariables();
+    const { updateUrl } = useUrlSync();
+    const t = useTranslations('RestClientPage');
+
+    useEffect(() => {
+      setIsMounted(true);
+
+      const loadSavedRequest = (): RequestData => {
+        try {
+          if (typeof window !== 'undefined') {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+              return JSON.parse(saved);
+            }
+          }
+        } catch (error) {
+          console.error('Error loading saved request:', error);
+        }
+
         return {
           method: initialMethod,
           url: initialUrl,
           headers: initialHeaders,
           body: initialBody,
         };
-      }
-
-      try {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved) {
-          return JSON.parse(saved);
-        }
-      } catch (error) {
-        console.error('Error loading saved request:', error);
-      }
-
-      return {
-        method: initialMethod,
-        url: initialUrl,
-        headers: initialHeaders,
-        body: initialBody,
       };
-    };
 
-    const [request, setRequest] = useState<RequestData>(loadSavedRequest);
-    const [headers, setHeaders] = useState<Header[]>(
-      headersObjectToArray(request.headers)
-    );
-
-    const { response, isLoading, error, execute } = useRequestHandler();
-    const { updateUrl } = useUrlSync();
+      const savedRequest = loadSavedRequest();
+      setRequest(savedRequest);
+      setHeaders(headersObjectToArray(savedRequest.headers));
+    }, [initialMethod, initialUrl, initialBody, initialHeaders]);
 
     useEffect(() => {
-      if (isInitialized.current) {
+      if (isMounted) {
         try {
           localStorage.setItem(STORAGE_KEY, JSON.stringify(request));
         } catch (error) {
           console.error('Error saving request to localStorage:', error);
         }
       }
-    }, [request]);
+    }, [request, isMounted]);
 
     useEffect(() => {
-      if (!isInitialized.current) {
-        isInitialized.current = true;
-        return;
-      }
-    }, []);
-
-    useEffect(() => {
-      if (isInitialized.current) {
+      if (isMounted) {
         updateUrl(request);
       }
-    }, [request, updateUrl]);
+    }, [request, updateUrl, isMounted]);
 
     useEffect(() => {
       setRequest((prev) => ({
@@ -113,13 +114,13 @@ const RestClientPage = memo(
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : 'Unknown error';
-        message.error('Request failed: ' + errorMessage);
+        message.error(t('requestFailed') + errorMessage);
       }
-    }, [request, execute]);
+    }, [request, execute, t]);
 
     const handleExecute = useCallback(async () => {
       if (!request.url.trim()) {
-        message.error('Please enter a URL');
+        message.error(t('inputError'));
         return;
       }
 
@@ -145,13 +146,13 @@ const RestClientPage = memo(
           body: request.body,
         });
 
-        message.success('Request completed successfully');
+        message.success(t('requestSuccess'));
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : 'Unknown error';
-        message.error('Request failed: ' + errorMessage);
+        message.error(t('requestFailed') + errorMessage);
       }
-    }, [request, execute, executeRequest]);
+    }, [request, execute, executeRequest, t]);
 
     const updateRequest = useCallback((updates: Partial<RequestData>) => {
       setRequest((prev) => ({ ...prev, ...updates }));
@@ -168,11 +169,23 @@ const RestClientPage = memo(
       [updateRequest]
     );
 
+    if (!isMounted) {
+      return (
+        <section className={styles.section}>
+          <Card className={styles.card}>
+            <div className={styles['loading-container']}>
+              <Spin size="large" />
+            </div>
+          </Card>
+        </section>
+      );
+    }
+
     return (
       <section className={styles.section}>
         <Card className={styles.card}>
           <Title level={2} className={styles.title}>
-            REST Client
+            {t('title')}
           </Title>
 
           <RequestPanel
@@ -192,6 +205,13 @@ const RestClientPage = memo(
               response={response}
               error={error}
               isLoading={isLoading}
+            />
+
+            <VariablesInfo
+              url={request.url}
+              headers={request.headers}
+              body={request.body}
+              variables={variables}
             />
           </div>
         </Card>

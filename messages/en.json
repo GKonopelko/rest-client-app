@@ -72,11 +72,13 @@
     "passwordsMismatch": "Passwords must match"
   },
   "RestClientPage": {
-    "title": "Test your request",
+    "title": "REST Client",
     "request": "Request",
     "urlPlaceholder": "Enter URL (e.g., https://api.example.com)",
     "submitButton": "Send",
-    "inputError": "URL is required"
+    "inputError": "URL is required",
+    "requestSuccess": "Request completed successfully",
+    "requestFailed": "Request failed: "
   },
   "HistoryPage": {},
   "VariablesPage": {

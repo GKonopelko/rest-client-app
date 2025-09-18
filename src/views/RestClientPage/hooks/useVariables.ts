@@ -1,5 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Variable, loadVariablesFromStorage } from '@/utils/variablesUtils';
+import {
+  Variable,
+  loadVariablesFromStorage,
+  saveVariablesToStorage,
+} from '@/utils/variablesUtils';
 
 export const useVariables = () => {
   const [variables, setVariables] = useState<Variable[]>([]);
@@ -9,5 +13,10 @@ export const useVariables = () => {
     setVariables(savedVariables);
   }, []);
 
-  return { variables };
+  const updateVariables = (newVariables: Variable[]) => {
+    setVariables(newVariables);
+    saveVariablesToStorage(newVariables);
+  };
+
+  return { variables, updateVariables };
 };

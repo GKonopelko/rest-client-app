@@ -29,6 +29,13 @@
   gap: 16px;
 }
 
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 400px;
+}
+
 @media (width <= 768px) {
   .section {
     width: 95vw;

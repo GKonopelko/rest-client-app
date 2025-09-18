@@ -1,6 +1,7 @@
 import React, { memo, useCallback } from 'react';
 import { Button, Space } from 'antd';
 import { SendOutlined } from '@ant-design/icons';
+import { useTranslations } from 'next-intl';
 
 import CodeGenerator from '@/components/CodeGenerator/CodeGenerator';
 import { RequestData } from '../../types';
@@ -17,6 +18,8 @@ interface RequestPanelProps {
 
 const RequestPanel = memo(
   ({ request, onUpdate, onExecute, isLoading }: RequestPanelProps) => {
+    const t = useTranslations('RestClientPage');
+
     const handleMethodChange = useCallback(
       (method: string) => {
         onUpdate({ method });
@@ -33,7 +36,7 @@ const RequestPanel = memo(
 
     return (
       <div className={styles['request-panel']}>
-        <h3>Request</h3>
+        <h3>{t('request')}</h3>
         <Space.Compact className={styles['url-line']} size="large">
           <MethodSelector
             value={request.method}
@@ -42,7 +45,7 @@ const RequestPanel = memo(
           <UrlInput
             value={request.url}
             onChange={handleUrlChange}
-            placeholder="Enter URL"
+            placeholder={t('urlPlaceholder')}
           />
           <Button
             type="primary"
@@ -51,7 +54,7 @@ const RequestPanel = memo(
             loading={isLoading}
             className={styles['submit-button']}
           >
-            Send
+            {t('submitButton')}
           </Button>
           <CodeGenerator
             method={request.method}
