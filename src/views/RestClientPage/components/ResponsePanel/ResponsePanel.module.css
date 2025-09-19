@@ -9,3 +9,19 @@
 .response-info > * {
   margin-right: 16px;
 }
+
+.error {
+  color: #ff4d4f;
+}
+
+.success {
+  color: #52c41a;
+}
+
+.response-info {
+  margin-bottom: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}

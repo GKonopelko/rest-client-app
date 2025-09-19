@@ -1,5 +1,6 @@
 import React from 'react';
 import { Typography } from 'antd';
+import { useTranslations } from 'next-intl';
 import HeadersEditor from '@/components/HeadersEditor/HeadersEditor';
 import { Header } from '../../types';
 import styles from './HeadersPanel.module.css';
@@ -12,9 +13,11 @@ interface HeadersPanelProps {
 }
 
 export default function HeadersPanel({ headers, onChange }: HeadersPanelProps) {
+  const t = useTranslations('RestClientPage');
+
   return (
     <div className={styles['headers-panel']}>
-      <Title level={4}>Headers</Title>
+      <Title level={4}>{t('headers')}</Title>
       <HeadersEditor headers={headers} onChange={onChange} />
     </div>
   );

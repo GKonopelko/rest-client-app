@@ -1,3 +1,6 @@
+// Кэш для хранения сгенерированного кода
+const codeCache = new Map<string, string>();
+
 export function generateCode(
   language: string,
   method: string,
@@ -5,6 +8,15 @@ export function generateCode(
   headers: Record<string, string>,
   body: string
 ): string {
+  // Создаем уникальный ключ для кэша
+  const cacheKey = `${language}-${method}-${url}-${JSON.stringify(headers)}-${body}`;
+
+  // Проверяем кэш перед генерацией
+  const cachedCode = codeCache.get(cacheKey);
+  if (cachedCode !== undefined) {
+    return cachedCode;
+  }
+
   try {
     const variablePattern = /\{\{[^}]+\}\}/;
     if (
@@ -12,31 +24,50 @@ export function generateCode(
       variablePattern.test(JSON.stringify(headers)) ||
       variablePattern.test(body)
     ) {
-      return 'Error: Unresolved variables detected in request parameters. Please make sure all variables are defined.';
+      const errorMsg =
+        'Error: Unresolved variables detected in request parameters. Please make sure all variables are defined.';
+      codeCache.set(cacheKey, errorMsg);
+      return errorMsg;
     }
+
+    let result: string;
 
     switch (language) {
       case 'curl':
-        return generateCurlCode(method, url, headers, body);
+        result = generateCurlCode(method, url, headers, body);
+        break;
       case 'javascript-fetch':
-        return generateJavascriptFetchCode(method, url, headers, body);
+        result = generateJavascriptFetchCode(method, url, headers, body);
+        break;
       case 'javascript-xhr':
-        return generateJavascriptXHRCode(method, url, headers, body);
+        result = generateJavascriptXHRCode(method, url, headers, body);
+        break;
       case 'nodejs':
-        return generateNodeJSCode(method, url, headers, body);
+        result = generateNodeJSCode(method, url, headers, body);
+        break;
       case 'python':
-        return generatePythonCode(method, url, headers, body);
+        result = generatePythonCode(method, url, headers, body);
+        break;
       case 'java':
-        return generateJavaCode(method, url, headers, body);
+        result = generateJavaCode(method, url, headers, body);
+        break;
       case 'csharp':
-        return generateCSharpCode(method, url, headers, body);
+        result = generateCSharpCode(method, url, headers, body);
+        break;
       case 'go':
-        return generateGoCode(method, url, headers, body);
+        result = generateGoCode(method, url, headers, body);
+        break;
       default:
-        return 'Unsupported language';
+        result = 'Unsupported language';
     }
+
+    // Сохраняем результат в кэш
+    codeCache.set(cacheKey, result);
+    return result;
   } catch (_error) {
-    return 'Error generating code';
+    const errorMsg = 'Error generating code';
+    codeCache.set(cacheKey, errorMsg);
+    return errorMsg;
   }
 }
 
@@ -364,4 +395,14 @@ function generateGoCode(
   code += `}`;
 
   return code;
+}
+
+// Функция для очистки кэша (опционально, для управления памятью)
+export function clearCodeCache(): void {
+  codeCache.clear();
+}
+
+// Функция для получения размера кэша (для отладки)
+export function getCodeCacheSize(): number {
+  return codeCache.size;
 }

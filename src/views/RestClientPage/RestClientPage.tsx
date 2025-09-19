@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, memo } from 'react';
-import { Card, Typography, message, Spin } from 'antd';
+import { Card, Typography, message } from 'antd';
 import { useLocale, useTranslations } from 'next-intl';
 import styles from './RestClient.module.css';
 
@@ -14,7 +14,7 @@ import VariablesInfo from './components/VariablesInfo/VariablesInfo';
 import { useRequestHandler } from './hooks/useRequestHandler';
 import { useVariables } from './hooks/useVariables';
 import { useUrlSync } from './hooks/useUrlSync';
-import { RequestData, Header } from './types';
+import { RequestData, Header, ResponseData } from './types';
 import {
   headersArrayToObject,
   headersObjectToArray,
@@ -49,10 +49,30 @@ const RestClientPage = memo(
     });
     const [headers, setHeaders] = useState<Header[]>([]);
 
-    const { response, isLoading, error, execute } = useRequestHandler();
     const { variables } = useVariables();
-    const { updateUrl } = useUrlSync();
     const t = useTranslations('RestClientPage');
+
+    const handleResult = useCallback(
+      (result: ResponseData) => {
+        if (result.status >= 400 || result.status === 0) {
+          const errorMsg =
+            result.status === 0
+              ? `Network Error: ${result.body}`
+              : `HTTP ${result.status}: ${result.statusText || 'Request failed'}`;
+
+          message.error(t('requestFailed') + errorMsg);
+        } else {
+          message.success(t('requestSuccess'));
+        }
+      },
+      [t]
+    );
+
+    const { response, isLoading, error, execute } = useRequestHandler({
+      variables,
+    });
+
+    const { updateUrl } = useUrlSync();
 
     useEffect(() => {
       setIsMounted(true);
@@ -118,21 +138,6 @@ const RestClientPage = memo(
       }));
     }, [headers]);
 
-    const executeRequest = useCallback(async () => {
-      try {
-        await execute({
-          method: request.method,
-          url: request.url,
-          headers: request.headers,
-          body: request.body,
-        });
-      } catch (err) {
-        const errorMessage =
-          err instanceof Error ? err.message : 'Unknown error';
-        message.error(t('requestFailed') + errorMessage);
-      }
-    }, [request, execute, t]);
-
     const handleExecute = useCallback(async () => {
       if (!request.url.trim()) {
         message.error(t('inputError'));
@@ -148,26 +153,13 @@ const RestClientPage = memo(
         setRequest((prev) => ({ ...prev, url: requestUrl }));
 
         setTimeout(() => {
-          executeRequest();
+          execute({ ...request, url: requestUrl }).then(handleResult);
         }, 100);
         return;
       }
 
-      try {
-        await execute({
-          method: request.method,
-          url: requestUrl,
-          headers: request.headers,
-          body: request.body,
-        });
-
-        message.success(t('requestSuccess'));
-      } catch (err) {
-        const errorMessage =
-          err instanceof Error ? err.message : 'Unknown error';
-        message.error(t('requestFailed') + errorMessage);
-      }
-    }, [request, execute, executeRequest, t]);
+      execute(request).then(handleResult);
+    }, [request, execute, t, handleResult]);
 
     const updateRequest = useCallback((updates: Partial<RequestData>) => {
       setRequest((prev) => ({ ...prev, ...updates }));
@@ -183,18 +175,6 @@ const RestClientPage = memo(
       },
       [updateRequest]
     );
-
-    if (!isMounted) {
-      return (
-        <section className={styles.section}>
-          <Card className={styles.card}>
-            <div className={styles['loading-container']}>
-              <Spin size="large" />
-            </div>
-          </Card>
-        </section>
-      );
-    }
 
     return (
       <section className={styles.section}>

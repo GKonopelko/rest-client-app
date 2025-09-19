@@ -78,7 +78,15 @@
     "submitButton": "Send",
     "inputError": "URL is required",
     "requestSuccess": "Request completed successfully",
-    "requestFailed": "Request failed: "
+    "requestFailed": "Request failed: ",
+    "headers": "Headers",
+    "body": "Body",
+    "response": "Response",
+    "variablesInfo": "Variables Information",
+    "variablesFormat": "Use variables with format:",
+    "availableVariables": "Available variables:",
+    "containsVariables": "Contains variables that will be interpolated",
+    "noResponse": "No response yet. Send a request to see results."
   },
   "HistoryPage": {},
   "VariablesPage": {
@@ -104,5 +112,21 @@
     "valueRequired": "Value is required",
     "invalidValue": "Invalid value",
     "errorText": "Error message"
+  },
+  "CodeGenerator": {
+    "generateCodeButton": "Generate Code",
+    "modalTitle": "Generated Code",
+    "closeButton": "Close",
+    "generatingCode": "Generating code...",
+    "codeNotAvailable": "Code not available",
+    "generatingAllLanguages": "Generating code for all languages...",
+    "codeForRequest": "Code for {method} request ({language}):",
+    "invalidJsonHeaders": "Invalid JSON in headers",
+    "interpolationError": "Interpolation error",
+    "unresolvedVariablesError": "Error: Unresolved variables detected: {vars}",
+    "invalidHeadersFormat": "Error: Invalid headers format",
+    "generationError": "Error generating {lang} code: {error}",
+    "generalGenerationError": "Error generating codes: {error}",
+    "unknownError": "Unknown error"
   }
 }
