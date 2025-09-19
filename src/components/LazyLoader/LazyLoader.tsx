@@ -2,24 +2,7 @@
 
 import { Suspense } from 'react';
 import dynamic from 'next/dynamic';
-import { LoadingOutlined } from '@ant-design/icons';
-import styles from './LazyLoader.module.css';
-
-export function GlobalLoading({
-  message = 'Loading...',
-  size = 48,
-}: {
-  message?: string;
-  size?: number;
-}) {
-  console.log('GlobalLoading rendered:', message);
-  return (
-    <div className={styles.container}>
-      <LoadingOutlined className={styles.icon} style={{ fontSize: size }} />
-      {message && <p className={styles.message}>{message}</p>}
-    </div>
-  );
-}
+import LoadingState from './LoadingState';
 
 interface LazyLoaderProps {
   component: 'RestClientPage' | 'VariablesPage' | 'HistoryPage';
@@ -41,14 +24,12 @@ export default function LazyLoader({
   size = 48,
 }: LazyLoaderProps) {
   const LazyComponent = dynamic(componentImporters[component], {
-    loading: () => <GlobalLoading message={loadingMessage} size={size} />,
+    loading: () => <LoadingState message={loadingMessage} size={size} />,
     ssr: true,
   });
 
   return (
-    <Suspense
-      fallback={<GlobalLoading message={suspenseMessage} size={size} />}
-    >
+    <Suspense fallback={<LoadingState message={suspenseMessage} size={size} />}>
       <LazyComponent />
     </Suspense>
   );

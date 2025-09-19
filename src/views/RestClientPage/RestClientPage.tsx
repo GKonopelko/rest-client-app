@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, memo } from 'react';
-import { Card, Typography, message, Spin } from 'antd';
+import { Card, Typography, message } from 'antd';
 import { useLocale, useTranslations } from 'next-intl';
 import styles from './RestClient.module.css';
 
@@ -175,18 +175,6 @@ const RestClientPage = memo(
       },
       [updateRequest]
     );
-
-    if (!isMounted) {
-      return (
-        <section className={styles.section}>
-          <Card className={styles.card}>
-            <div className={styles['loading-container']}>
-              <Spin size="large" />
-            </div>
-          </Card>
-        </section>
-      );
-    }
 
     return (
       <section className={styles.section}>
