@@ -49,8 +49,10 @@ const RestClientPage = memo(
     });
     const [headers, setHeaders] = useState<Header[]>([]);
 
-    const { response, isLoading, error, execute } = useRequestHandler();
     const { variables } = useVariables();
+    const { response, isLoading, error, execute } = useRequestHandler({
+      variables,
+    });
     const { updateUrl } = useUrlSync();
     const t = useTranslations('RestClientPage');
 
@@ -118,21 +120,6 @@ const RestClientPage = memo(
       }));
     }, [headers]);
 
-    const executeRequest = useCallback(async () => {
-      try {
-        await execute({
-          method: request.method,
-          url: request.url,
-          headers: request.headers,
-          body: request.body,
-        });
-      } catch (err) {
-        const errorMessage =
-          err instanceof Error ? err.message : 'Unknown error';
-        message.error(t('requestFailed') + errorMessage);
-      }
-    }, [request, execute, t]);
-
     const handleExecute = useCallback(async () => {
       if (!request.url.trim()) {
         message.error(t('inputError'));
@@ -148,26 +135,20 @@ const RestClientPage = memo(
         setRequest((prev) => ({ ...prev, url: requestUrl }));
 
         setTimeout(() => {
-          executeRequest();
+          execute(request);
         }, 100);
         return;
       }
 
       try {
-        await execute({
-          method: request.method,
-          url: requestUrl,
-          headers: request.headers,
-          body: request.body,
-        });
-
+        await execute(request);
         message.success(t('requestSuccess'));
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : 'Unknown error';
         message.error(t('requestFailed') + errorMessage);
       }
-    }, [request, execute, executeRequest, t]);
+    }, [request, execute, t]);
 
     const updateRequest = useCallback((updates: Partial<RequestData>) => {
       setRequest((prev) => ({ ...prev, ...updates }));
