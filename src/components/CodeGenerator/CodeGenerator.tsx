@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
-import { Modal, Button, Select, Input, Typography, message } from 'antd';
+import React, { useState, useMemo } from 'react';
+import { Button } from 'antd';
 import { CodeOutlined } from '@ant-design/icons';
-import { generateCode } from '@/utils/codeGenerator';
+import { useTranslations } from 'next-intl';
 import {
   interpolateVariables,
   loadVariablesFromStorage,
@@ -11,10 +11,7 @@ import {
   Variable,
 } from '@/utils/variablesUtils';
 import styles from './CodeGenerator.module.css';
-
-const { Option } = Select;
-const { TextArea } = Input;
-const { Title } = Typography;
+import CodeGeneratorModal from './CodeGeneratorModal';
 
 interface CodeGeneratorProps {
   method: string;
@@ -24,16 +21,16 @@ interface CodeGeneratorProps {
   variables?: Variable[];
 }
 
-const codeLanguages = [
-  { value: 'curl', label: 'cURL' },
-  { value: 'javascript-fetch', label: 'JavaScript (Fetch)' },
-  { value: 'javascript-xhr', label: 'JavaScript (XHR)' },
-  { value: 'nodejs', label: 'Node.js' },
-  { value: 'python', label: 'Python' },
-  { value: 'java', label: 'Java' },
-  { value: 'csharp', label: 'C#' },
-  { value: 'go', label: 'Go' },
-];
+// Выносим константы наружу - они никогда не меняются
+const ERROR_MESSAGES = {
+  invalidJsonHeaders: 'Invalid JSON in headers',
+  interpolationError: 'Error interpolating variables',
+  unresolvedVariablesError: 'Unresolved variables: {vars}',
+  invalidHeadersFormat: 'Invalid headers format',
+  generationError: 'Error generating {lang} code: {error}',
+  unknownError: 'Unknown error',
+  generalGenerationError: 'Error generating code: {error}',
+};
 
 export default function CodeGenerator({
   method,
@@ -42,78 +39,71 @@ export default function CodeGenerator({
   body,
   variables: externalVariables = [],
 }: CodeGeneratorProps) {
+  const t = useTranslations('CodeGenerator');
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [generatedCode, setGeneratedCode] = useState('');
-  const [selectedLanguage, setSelectedLanguage] = useState('curl');
-  const [loading, setLoading] = useState(false);
 
-  const variables =
-    externalVariables.length > 0
-      ? externalVariables
-      : loadVariablesFromStorage();
+  const variables = useMemo(
+    () =>
+      externalVariables.length > 0
+        ? externalVariables
+        : loadVariablesFromStorage(),
+    [externalVariables]
+  );
 
-  const handleGenerateCode = useCallback(() => {
+  // Вычисляем интерполированные значения один раз при открытии модалки
+  const interpolatedValues = useMemo(() => {
     try {
-      setLoading(true);
-
       let parsedHeaders = {};
       try {
         parsedHeaders = JSON.parse(headers || '{}');
       } catch {
-        message.error('Invalid JSON in headers');
-        return;
+        return {
+          interpolatedUrl: url,
+          interpolatedHeaders: headers,
+          interpolatedBody: body,
+          hasUnresolvedVars: true,
+          unresolvedVars: [ERROR_MESSAGES.invalidJsonHeaders],
+        };
       }
 
-      const interpolatedUrl = interpolateVariables(url, variables);
-      const interpolatedHeaders = interpolateVariables(
+      const interpolatedUrlValue = interpolateVariables(url, variables);
+      const interpolatedHeadersValue = interpolateVariables(
         JSON.stringify(parsedHeaders),
         variables
       );
-      const interpolatedBody = interpolateVariables(body, variables);
+      const interpolatedBodyValue = interpolateVariables(body, variables);
 
-      const unresolvedVars = [
-        ...extractVariableNames(interpolatedUrl),
-        ...extractVariableNames(interpolatedHeaders),
-        ...extractVariableNames(interpolatedBody),
+      const unresolvedVarsList = [
+        ...extractVariableNames(interpolatedUrlValue),
+        ...extractVariableNames(interpolatedHeadersValue),
+        ...extractVariableNames(interpolatedBodyValue),
       ];
 
-      if (unresolvedVars.length > 0) {
-        message.error(`Unresolved variables: ${unresolvedVars.join(', ')}`);
-        return;
-      }
-
-      let finalHeaders = {};
-      try {
-        finalHeaders = JSON.parse(interpolatedHeaders || '{}');
-      } catch {
-        message.error('Invalid JSON in headers after variable interpolation');
-        return;
-      }
-
-      const code = generateCode(
-        selectedLanguage,
-        method,
-        interpolatedUrl,
-        finalHeaders,
-        interpolatedBody
-      );
-      setGeneratedCode(code);
+      return {
+        interpolatedUrl: interpolatedUrlValue,
+        interpolatedHeaders: interpolatedHeadersValue,
+        interpolatedBody: interpolatedBodyValue,
+        hasUnresolvedVars: unresolvedVarsList.length > 0,
+        unresolvedVars: unresolvedVarsList,
+      };
     } catch (error) {
-      console.error('Error generating code:', error);
-      message.error('Failed to generate code');
-    } finally {
-      setLoading(false);
+      console.error('Error interpolating variables:', error);
+      return {
+        interpolatedUrl: url,
+        interpolatedHeaders: headers,
+        interpolatedBody: body,
+        hasUnresolvedVars: true,
+        unresolvedVars: [ERROR_MESSAGES.interpolationError],
+      };
     }
-  }, [method, url, headers, body, variables, selectedLanguage]);
+  }, [url, headers, body, variables]);
 
   const handleOpenModal = () => {
     setIsModalVisible(true);
-    handleGenerateCode();
   };
 
-  const handleLanguageChange = (value: string) => {
-    setSelectedLanguage(value);
-    handleGenerateCode();
+  const handleCloseModal = () => {
+    setIsModalVisible(false);
   };
 
   return (
@@ -122,48 +112,27 @@ export default function CodeGenerator({
         icon={<CodeOutlined />}
         onClick={handleOpenModal}
         className={styles.button}
-        loading={loading}
       >
-        Generate Code
+        {t('generateCodeButton')}
       </Button>
 
-      <Modal
-        title="Generated Code"
-        open={isModalVisible}
-        onCancel={() => setIsModalVisible(false)}
-        footer={[
-          <Button key="close" onClick={() => setIsModalVisible(false)}>
-            Close
-          </Button>,
-        ]}
-        width={800}
-        className={styles.modal}
-      >
-        <div className={styles['modal-content']}>
-          <Select
-            value={selectedLanguage}
-            onChange={handleLanguageChange}
-            className={styles.select}
-          >
-            {codeLanguages.map((lang) => (
-              <Option key={lang.value} value={lang.value}>
-                {lang.label}
-              </Option>
-            ))}
-          </Select>
-
-          <Title level={5} className={styles['code-title']}>
-            Code for {method} request:
-          </Title>
-
-          <TextArea
-            value={generatedCode}
-            readOnly
-            rows={15}
-            className={styles['text-area']}
-          />
-        </div>
-      </Modal>
+      {isModalVisible && (
+        <CodeGeneratorModal
+          isVisible={isModalVisible}
+          onClose={handleCloseModal}
+          method={method}
+          interpolatedValues={interpolatedValues}
+          errorMessages={ERROR_MESSAGES}
+          translations={{
+            modalTitle: t('modalTitle'),
+            closeButton: t('closeButton'),
+            generatingCode: t('generatingCode'),
+            codeNotAvailable: t('codeNotAvailable'),
+            generatingAllLanguages: t('generatingAllLanguages'),
+            codeForRequestTemplate: 'Code for {method} request ({language}):',
+          }}
+        />
+      )}
     </>
   );
 }

@@ -104,5 +104,21 @@
     "valueRequired": "Значение обязательно",
     "invalidValue": "Неверное значение",
     "errorText": "Сообщение об ошибке"
+  },
+  "CodeGenerator": {
+    "generateCodeButton": "Сгенерировать код",
+    "modalTitle": "Сгенерированный код",
+    "closeButton": "Закрыть",
+    "generatingCode": "Генерация кода...",
+    "codeNotAvailable": "Код недоступен",
+    "generatingAllLanguages": "Генерация кода для всех языков...",
+    "codeForRequest": "Код для {method} запроса ({language}):",
+    "invalidJsonHeaders": "Неверный JSON в заголовках",
+    "interpolationError": "Ошибка интерполяции",
+    "unresolvedVariablesError": "Ошибка: Обнаружены неразрешенные переменные: {vars}",
+    "invalidHeadersFormat": "Ошибка: Неверный формат заголовков",
+    "generationError": "Ошибка генерации кода для {lang}: {error}",
+    "generalGenerationError": "Ошибка генерации кодов: {error}",
+    "unknownError": "Неизвестная ошибка"
   }
 }

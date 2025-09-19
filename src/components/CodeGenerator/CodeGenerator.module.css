@@ -10,6 +10,7 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+  min-height: 400px;
 }
 
 .select {
@@ -32,5 +33,13 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100px;
+  height: 200px;
+  color: #1890ff;
+  flex-direction: column;
+}
+
+.error-message {
+  color: #ff4d4f;
+  text-align: center;
+  padding: 20px;
 }
