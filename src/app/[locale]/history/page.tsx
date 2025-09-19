@@ -1,5 +1,11 @@
-import HistoryPage from '@/views/HistoryPage/HistoryPage';
+import LazyLoader from '@/components/LazyLoader/LazyLoader';
 
 export default function AppHistoryPage() {
-  return <HistoryPage />;
+  return (
+    <LazyLoader
+      component="HistoryPage"
+      loadingMessage="Loading History..."
+      suspenseMessage="Initializing History..."
+    />
+  );
 }

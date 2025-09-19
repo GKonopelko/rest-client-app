@@ -1,5 +1,11 @@
-import VariablesPage from '@/views/VariablesPage/VariablesPage';
+import LazyLoader from '@/components/LazyLoader/LazyLoader';
 
 export default function AppVariablesPage() {
-  return <VariablesPage />;
+  return (
+    <LazyLoader
+      component="VariablesPage"
+      loadingMessage="Loading Variables Manager..."
+      suspenseMessage="Initializing Variables..."
+    />
+  );
 }

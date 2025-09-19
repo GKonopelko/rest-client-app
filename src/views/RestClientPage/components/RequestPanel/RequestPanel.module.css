@@ -1,0 +1,28 @@
+.request-panel {
+  margin-bottom: 24px;
+}
+
+.url-line {
+  width: 100%;
+  display: flex;
+  gap: 8px;
+}
+
+.submit-button {
+  width: 120px;
+  flex-shrink: 0;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+@media (width <= 768px) {
+  .url-line {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .submit-button {
+    width: 100%;
+    border-radius: 6px;
+  }
+}

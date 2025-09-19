@@ -1,244 +1,240 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
-import {
-  Card,
-  Typography,
-  Space,
-  Input,
-  Button,
-  Select,
-  Form,
-  message,
-} from 'antd';
-import { SendOutlined } from '@ant-design/icons';
+import React, { useState, useEffect, useCallback, memo } from 'react';
+import { Card, Typography, message, Spin } from 'antd';
+import { useLocale, useTranslations } from 'next-intl';
 import styles from './RestClient.module.css';
-import { useTranslations } from 'next-intl';
-import {
-  Variable,
-  interpolateVariables,
-  loadVariablesFromStorage,
-  hasVariables,
-  extractVariableNames,
-} from '@/utils/variablesUtils';
 
-interface RequestData {
-  method: string;
-  url: string;
+import RequestPanel from './components/RequestPanel/RequestPanel';
+import HeadersPanel from './components/HeadersPanel/HeadersPanel';
+import ResponsePanel from './components/ResponsePanel/ResponsePanel';
+import BodyPanel from './components/BodyPanel/BodyPanel';
+import VariablesInfo from './components/VariablesInfo/VariablesInfo';
+
+import { useRequestHandler } from './hooks/useRequestHandler';
+import { useVariables } from './hooks/useVariables';
+import { useUrlSync } from './hooks/useUrlSync';
+import { RequestData, Header } from './types';
+import {
+  headersArrayToObject,
+  headersObjectToArray,
+} from '@/utils/headersUtils';
+
+const { Title } = Typography;
+
+interface RestClientPageProps {
+  initialMethod?: string;
+  initialUrl?: string;
+  initialBody?: string;
+  initialHeaders?: Record<string, string>;
 }
 
-const { Title, Text } = Typography;
-const { Option } = Select;
-const { TextArea } = Input;
+const STORAGE_KEY = 'rest-client-request-data';
 
-const methods: string[] = [
-  'GET',
-  'POST',
-  'PUT',
-  'DELETE',
-  'PATCH',
-  'HEAD',
-  'OPTIONS',
-  'CONNECT',
-  'TRACE',
-];
+const RestClientPage = memo(
+  ({
+    initialMethod = 'GET',
+    initialUrl = '',
+    initialBody = '',
+    initialHeaders = {},
+  }: RestClientPageProps) => {
+    const locale = useLocale();
+    const [isMounted, setIsMounted] = useState(false);
+    const [isLocaleChanging, setIsLocaleChanging] = useState(false);
+    const [request, setRequest] = useState<RequestData>({
+      method: 'GET',
+      url: '',
+      headers: {},
+      body: '',
+    });
+    const [headers, setHeaders] = useState<Header[]>([]);
 
-export default function RestClientPage() {
-  const pathname = usePathname();
-  const urlParts = pathname?.split('/') ?? [];
-  const [method, setMethod] = useState(urlParts[3] ?? 'GET');
-  const [url, setUrl] = useState('');
-  const [headers, setHeaders] = useState(
-    '{\n  "Content-Type": "application/json"\n}'
-  );
-  const [body, setBody] = useState('');
-  const [response, setResponse] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [variables, setVariables] = useState<Variable[]>([]);
-  const t = useTranslations('RestClientPage');
+    const { response, isLoading, error, execute } = useRequestHandler();
+    const { variables } = useVariables();
+    const { updateUrl } = useUrlSync();
+    const t = useTranslations('RestClientPage');
 
-  const router = useRouter();
+    useEffect(() => {
+      setIsMounted(true);
 
-  useEffect(() => {
-    const savedVariables = loadVariablesFromStorage();
-    setVariables(savedVariables);
-  }, []);
+      const handleLocaleChange = () => {
+        setIsLocaleChanging(true);
+        setTimeout(() => setIsLocaleChanging(false), 1000);
+      };
 
-  const onFinish = (data: RequestData) => {
-    if (!urlParts) return;
-    if (urlParts.length >= 3) {
-      router?.push(`/${urlParts[2]}/${data.method}`);
-    } else {
-      router?.push(`${pathname}/${data.method}`);
-    }
-  };
+      window.addEventListener('localechange', handleLocaleChange);
 
-  const handleSendRequest = async () => {
-    if (!url.trim()) {
-      message.error(t('inputError'));
-      return;
-    }
+      return () => {
+        window.removeEventListener('localechange', handleLocaleChange);
+      };
+    }, []);
 
-    try {
-      setLoading(true);
+    useEffect(() => {
+      const loadSavedRequest = (): RequestData => {
+        try {
+          if (typeof window !== 'undefined') {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+              return JSON.parse(saved);
+            }
+          }
+        } catch (error) {
+          console.error('Error loading saved request:', error);
+        }
 
-      const interpolatedUrl = interpolateVariables(url, variables);
-      const interpolatedHeaders = interpolateVariables(headers, variables);
-      const interpolatedBody = interpolateVariables(body, variables);
+        return {
+          method: initialMethod,
+          url: initialUrl,
+          headers: initialHeaders,
+          body: initialBody,
+        };
+      };
 
-      const unresolvedVars = [
-        ...extractVariableNames(interpolatedUrl),
-        ...extractVariableNames(interpolatedHeaders),
-        ...extractVariableNames(interpolatedBody),
-      ];
+      const savedRequest = loadSavedRequest();
+      setRequest(savedRequest);
+      setHeaders(headersObjectToArray(savedRequest.headers));
+    }, [initialMethod, initialUrl, initialBody, initialHeaders]);
 
-      if (unresolvedVars.length > 0) {
-        message.error(`Unresolved variables: ${unresolvedVars.join(', ')}`);
-        return;
+    useEffect(() => {
+      if (isMounted) {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(request));
+        } catch (error) {
+          console.error('Error saving request to localStorage:', error);
+        }
       }
+    }, [request, isMounted]);
 
-      let parsedHeaders = {};
+    useEffect(() => {
+      if (isMounted && !isLocaleChanging) {
+        updateUrl(request);
+      }
+    }, [request, updateUrl, isMounted, locale, isLocaleChanging]);
+
+    useEffect(() => {
+      setRequest((prev) => ({
+        ...prev,
+        headers: headersArrayToObject(headers),
+      }));
+    }, [headers]);
+
+    const executeRequest = useCallback(async () => {
       try {
-        parsedHeaders = JSON.parse(interpolatedHeaders || '{}');
-      } catch {
-        message.error('Invalid JSON in headers');
+        await execute({
+          method: request.method,
+          url: request.url,
+          headers: request.headers,
+          body: request.body,
+        });
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : 'Unknown error';
+        message.error(t('requestFailed') + errorMessage);
+      }
+    }, [request, execute, t]);
+
+    const handleExecute = useCallback(async () => {
+      if (!request.url.trim()) {
+        message.error(t('inputError'));
         return;
       }
 
-      const startTime = Date.now();
-      const response = await fetch(interpolatedUrl, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          ...parsedHeaders,
-        },
-        body:
-          method !== 'GET' && method !== 'HEAD' ? interpolatedBody : undefined,
-      });
+      let requestUrl = request.url.trim();
+      if (
+        !requestUrl.startsWith('http://') &&
+        !requestUrl.startsWith('https://')
+      ) {
+        requestUrl = 'https://' + requestUrl;
+        setRequest((prev) => ({ ...prev, url: requestUrl }));
 
-      const responseTime = Date.now() - startTime;
-      const responseData = await response.text();
+        setTimeout(() => {
+          executeRequest();
+        }, 100);
+        return;
+      }
 
-      const formattedResponse = `Status: ${response.status} ${response.statusText}
-Time: ${responseTime}ms
-Size: ${responseData.length} bytes
+      try {
+        await execute({
+          method: request.method,
+          url: requestUrl,
+          headers: request.headers,
+          body: request.body,
+        });
 
-${responseData}`;
+        message.success(t('requestSuccess'));
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : 'Unknown error';
+        message.error(t('requestFailed') + errorMessage);
+      }
+    }, [request, execute, executeRequest, t]);
 
-      setResponse(formattedResponse);
-      message.success('Request completed successfully');
-    } catch (error: unknown) {
-      const errorMessage =
-        error instanceof Error ? error.message : 'Unknown error';
-      message.error('Request failed: ' + errorMessage);
-      setResponse(`Error: ${errorMessage}`);
-    } finally {
-      setLoading(false);
+    const updateRequest = useCallback((updates: Partial<RequestData>) => {
+      setRequest((prev) => ({ ...prev, ...updates }));
+    }, []);
+
+    const handleHeadersChange = useCallback((newHeaders: Header[]) => {
+      setHeaders(newHeaders);
+    }, []);
+
+    const handleBodyChange = useCallback(
+      (body: string) => {
+        updateRequest({ body });
+      },
+      [updateRequest]
+    );
+
+    if (!isMounted) {
+      return (
+        <section className={styles.section}>
+          <Card className={styles.card}>
+            <div className={styles['loading-container']}>
+              <Spin size="large" />
+            </div>
+          </Card>
+        </section>
+      );
     }
-  };
 
-  const availableVariables =
-    variables.map((v) => `{{${v.name}}}`).join(', ') || 'None';
+    return (
+      <section className={styles.section}>
+        <Card className={styles.card}>
+          <Title level={2} className={styles.title}>
+            {t('title')}
+          </Title>
 
-  return (
-    <section className={styles.section}>
-      <Card className={styles.card}>
-        <Title level={2} className={styles.title}>
-          {t('title')}
-        </Title>
+          <RequestPanel
+            request={request}
+            onUpdate={updateRequest}
+            onExecute={handleExecute}
+            isLoading={isLoading}
+          />
 
-        <Form className={styles.form} onFinish={onFinish}>
-          <Title level={3}>{t('request')}</Title>
-          <Space.Compact className={styles['url-line']} size="large">
-            <Form.Item name="method" initialValue={method}>
-              <Select
-                className={styles.select}
-                value={method}
-                onChange={(value) => setMethod(value)}
-              >
-                {methods.map((elem) => (
-                  <Option key={elem} value={elem}>
-                    {elem}
-                  </Option>
-                ))}
-              </Select>
-            </Form.Item>
-            <Form.Item className={styles['url-wrapper']} name="url">
-              <Input
-                placeholder={t('urlPlaceholder')}
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-              />
-            </Form.Item>
-            <Form.Item>
-              <Button
-                type="primary"
-                icon={<SendOutlined />}
-                onClick={handleSendRequest}
-                loading={loading}
-                className={styles['submit-button']}
-              >
-                {t('submitButton')}
-              </Button>
-            </Form.Item>
-          </Space.Compact>
-        </Form>
-
-        <div className={styles.panels}>
-          <div className={styles['panel-row']}>
-            <div className={styles.panel}>
-              <Title level={4}>Headers (JSON)</Title>
-              <TextArea
-                value={headers}
-                onChange={(e) => setHeaders(e.target.value)}
-                rows={6}
-                placeholder='{"Content-Type": "application/json"}'
-                className={styles['text-area']}
-              />
+          <div className={styles.panels}>
+            <div className={styles['panel-row']}>
+              <HeadersPanel headers={headers} onChange={handleHeadersChange} />
+              <BodyPanel value={request.body} onChange={handleBodyChange} />
             </div>
 
-            <div className={styles.panel}>
-              <Title level={4}>Body</Title>
-              <TextArea
-                value={body}
-                onChange={(e) => setBody(e.target.value)}
-                rows={8}
-                placeholder='{"key": "value"}'
-                className={styles['text-area']}
-              />
-            </div>
-          </div>
+            <ResponsePanel
+              response={response}
+              error={error}
+              isLoading={isLoading}
+            />
 
-          <div className={styles['panel-full']}>
-            <Title level={4}>Response</Title>
-            <TextArea
-              value={response}
-              readOnly
-              rows={12}
-              className={styles['text-area-readonly']}
+            <VariablesInfo
+              url={request.url}
+              headers={request.headers}
+              body={request.body}
+              variables={variables}
             />
           </div>
-        </div>
+        </Card>
+      </section>
+    );
+  }
+);
 
-        <div className={styles['variables-info']}>
-          <Title level={4}>Variables Information</Title>
-          <Text type="secondary">
-            Use variables with format: <code>{'{{variableName}}'}</code>
-          </Text>
-          <br />
-          <Text type="secondary">
-            Available variables: {availableVariables}
-          </Text>
-          {hasVariables(url) || hasVariables(headers) || hasVariables(body) ? (
-            <div className={styles['warning-text']}>
-              <Text type="warning">
-                Contains variables that will be interpolated
-              </Text>
-            </div>
-          ) : null}
-        </div>
-      </Card>
-    </section>
-  );
-}
+RestClientPage.displayName = 'RestClientPage';
+
+export default RestClientPage;

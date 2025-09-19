@@ -72,11 +72,13 @@
     "passwordsMismatch": "Пароли должны совпадать"
   },
   "RestClientPage": {
-    "title": "Протестируйте свой запрос",
+    "title": "REST Клиент",
     "request": "Запрос",
     "urlPlaceholder": "Введите URL (например, https://api.example.com)",
     "submitButton": "Отправить",
-    "inputError": "URL обязателен для заполнения"
+    "inputError": "URL обязателен для заполнения",
+    "requestSuccess": "Запрос успешно выполнен",
+    "requestFailed": "Ошибка запроса: "
   },
   "HistoryPage": {},
   "VariablesPage": {

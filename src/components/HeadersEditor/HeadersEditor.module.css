@@ -1,0 +1,28 @@
+.headers-editor {
+  width: 100%;
+}
+
+.headers-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.header-row {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+
+.header-input {
+  flex: 1;
+}
+
+.remove-button {
+  flex-shrink: 0;
+}
+
+.add-button {
+  width: 100%;
+}
