@@ -24,7 +24,12 @@ export default function LanguageSwitcher({
     typeof params?.locale === 'string' ? params.locale : 'en';
 
   const handleLocaleSwitch = (targetLocale: string) => {
-    switchLocale(currentLocale, targetLocale);
+    window.dispatchEvent(
+      new CustomEvent('localechange', {
+        detail: { from: currentLocale, to: targetLocale },
+      })
+    );
+    switchLocale(targetLocale);
   };
 
   return (
@@ -34,16 +39,18 @@ export default function LanguageSwitcher({
         onClick={() => handleLocaleSwitch('en')}
         icon={!showText ? <GlobalOutlined /> : undefined}
         aria-label={t('localeEn')}
+        size="small"
       >
-        {showText ? t('localeEn') : ''}
+        {showText ? t('localeEn') : 'EN'}
       </Button>
       <Button
         type={currentLocale === 'ru' ? 'primary' : 'default'}
         onClick={() => handleLocaleSwitch('ru')}
         icon={!showText ? <GlobalOutlined /> : undefined}
         aria-label={t('localeRu')}
+        size="small"
       >
-        {showText ? t('localeRu') : ''}
+        {showText ? t('localeRu') : 'RU'}
       </Button>
     </Space.Compact>
   );

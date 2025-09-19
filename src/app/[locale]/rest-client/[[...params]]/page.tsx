@@ -4,6 +4,7 @@ import { useParams, useSearchParams } from 'next/navigation';
 import RestClientPage from '@/views/RestClientPage/RestClientPage';
 import { isValidBase64, decodeUnicodeFromBase64 } from '@/utils/urlEncoding';
 import { useEffect, useState, useRef } from 'react';
+import { useLocale } from 'next-intl';
 
 interface InitialRequestData {
   initialMethod: string;
@@ -15,6 +16,7 @@ interface InitialRequestData {
 export default function RestClientHandlerPage() {
   const params = useParams();
   const searchParams = useSearchParams();
+  const locale = useLocale();
   const [isClient, setIsClient] = useState(false);
   const initialDataRef = useRef<InitialRequestData | null>(null);
 
@@ -69,7 +71,7 @@ export default function RestClientHandlerPage() {
       initialBody: decodedBody,
       initialHeaders: decodedHeaders,
     };
-  }, [isClient, params.params, searchParams]);
+  }, [isClient, params.params, searchParams, locale]);
 
   if (!isClient || !initialDataRef.current) {
     return (

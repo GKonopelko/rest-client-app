@@ -41,17 +41,17 @@ export const encodeRequestToUrl = (
   url: string,
   headers: Record<string, string>,
   body: string,
-  locale: string = 'en'
+  currentLocale: string
 ): string => {
   try {
     if (!url.trim()) {
-      return `/${locale}/rest-client/${method}`;
+      return `/${currentLocale}/rest-client/${method}`;
     }
 
     const encodedUrl = encodeUnicode(url.trim());
     const encodedBody = body.trim() ? encodeUnicode(body.trim()) : '';
 
-    let path = `/${locale}/rest-client/${method}`;
+    let path = `/${currentLocale}/rest-client/${method}`;
     if (encodedUrl) {
       path += `/${encodedUrl}`;
     }
@@ -71,7 +71,7 @@ export const encodeRequestToUrl = (
     return queryString ? `${path}?${queryString}` : path;
   } catch (error) {
     console.error('Error encoding URL:', error);
-    return `/${locale}/rest-client/${method}`;
+    return `/${currentLocale}/rest-client/${method}`;
   }
 };
 

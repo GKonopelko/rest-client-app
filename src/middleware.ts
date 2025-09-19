@@ -4,35 +4,45 @@ import createMiddleware from 'next-intl/middleware';
 import { routing } from './i18n/routing';
 
 const protectedRoutes = ['/rest-client', '/history', '/variables'];
-
 const authPages = ['/sign-in', '/sign-up'];
 
 export default function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const token = req.cookies.get('token')?.value;
+  const nextLocale = req.cookies.get('NEXT_LOCALE')?.value;
+
+  if (
+    pathname.startsWith('/api/') ||
+    pathname.startsWith('/_next/') ||
+    pathname.includes('.') ||
+    pathname.startsWith('/_vercel/')
+  ) {
+    return NextResponse.next();
+  }
+
+  let locale = nextLocale || 'en';
+  const pathLocale = routing.locales.find(
+    (loc) => pathname.startsWith(`/${loc}/`) || pathname === `/${loc}`
+  );
+  if (pathLocale) {
+    locale = pathLocale;
+  }
 
   if (pathname === '/') {
     const url = req.nextUrl.clone();
-
-    url.pathname = '/en';
+    url.pathname = `/${locale}`;
     return NextResponse.redirect(url);
   }
 
   const pathnameHasLocale = routing.locales.some(
-    (locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`
+    (loc) => pathname.startsWith(`/${loc}/`) || pathname === `/${loc}`
   );
 
   if (!pathnameHasLocale) {
-    const locale = 'en';
     const url = req.nextUrl.clone();
     url.pathname = `/${locale}${pathname}`;
     return NextResponse.redirect(url);
   }
-
-  const pathLocale = routing.locales.find(
-    (locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`
-  );
-  const locale = pathLocale || 'en';
 
   const isProtectedRoute = protectedRoutes.some((route) =>
     pathname.startsWith(`/${locale}${route}`)

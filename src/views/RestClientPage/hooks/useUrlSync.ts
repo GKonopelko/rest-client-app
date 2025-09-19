@@ -1,59 +1,35 @@
 import { useCallback, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { encodeRequestToUrl } from '@/utils/urlEncoding';
-import { RequestData } from '../types';
+import { RequestData } from '@/views/RestClientPage/types';
+import { useLocale } from 'next-intl';
 
-export const useUrlSync = (locale: string = 'en') => {
+export const useUrlSync = () => {
   const router = useRouter();
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const lastRequestRef = useRef<string>('');
-  const isUpdatingFromUrl = useRef(false);
+  const pathname = usePathname();
+  const locale = useLocale();
+  const lastLocaleRef = useRef(locale);
 
   const updateUrl = useCallback(
     (request: RequestData) => {
-      if (isUpdatingFromUrl.current) {
-        isUpdatingFromUrl.current = false;
+      if (lastLocaleRef.current !== locale) {
+        lastLocaleRef.current = locale;
         return;
       }
 
-      const currentRequest = JSON.stringify({
-        method: request.method,
-        url: request.url,
-        body: request.body,
-        headers: request.headers,
-      });
+      const newUrl = encodeRequestToUrl(
+        request.method,
+        request.url,
+        request.headers,
+        request.body,
+        locale
+      );
 
-      if (lastRequestRef.current === currentRequest) {
-        return;
+      if (pathname !== newUrl) {
+        router.replace(newUrl, { scroll: false });
       }
-
-      lastRequestRef.current = currentRequest;
-
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-
-      timeoutRef.current = setTimeout(() => {
-        try {
-          const newUrl = encodeRequestToUrl(
-            request.method,
-            request.url,
-            request.headers,
-            request.body,
-            locale
-          );
-
-          const currentUrl = window.location.pathname + window.location.search;
-          if (newUrl !== currentUrl) {
-            isUpdatingFromUrl.current = true;
-            router.replace(newUrl, { scroll: false });
-          }
-        } catch (error) {
-          console.error('Error updating URL:', error);
-        }
-      }, 800);
     },
-    [router, locale]
+    [router, pathname, locale]
   );
 
   return { updateUrl };

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback, memo } from 'react';
 import { Card, Typography, message, Spin } from 'antd';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import styles from './RestClient.module.css';
 
 import RequestPanel from './components/RequestPanel/RequestPanel';
@@ -38,7 +38,9 @@ const RestClientPage = memo(
     initialBody = '',
     initialHeaders = {},
   }: RestClientPageProps) => {
+    const locale = useLocale();
     const [isMounted, setIsMounted] = useState(false);
+    const [isLocaleChanging, setIsLocaleChanging] = useState(false);
     const [request, setRequest] = useState<RequestData>({
       method: 'GET',
       url: '',
@@ -55,6 +57,19 @@ const RestClientPage = memo(
     useEffect(() => {
       setIsMounted(true);
 
+      const handleLocaleChange = () => {
+        setIsLocaleChanging(true);
+        setTimeout(() => setIsLocaleChanging(false), 1000);
+      };
+
+      window.addEventListener('localechange', handleLocaleChange);
+
+      return () => {
+        window.removeEventListener('localechange', handleLocaleChange);
+      };
+    }, []);
+
+    useEffect(() => {
       const loadSavedRequest = (): RequestData => {
         try {
           if (typeof window !== 'undefined') {
@@ -91,10 +106,10 @@ const RestClientPage = memo(
     }, [request, isMounted]);
 
     useEffect(() => {
-      if (isMounted) {
+      if (isMounted && !isLocaleChanging) {
         updateUrl(request);
       }
-    }, [request, updateUrl, isMounted]);
+    }, [request, updateUrl, isMounted, locale, isLocaleChanging]);
 
     useEffect(() => {
       setRequest((prev) => ({

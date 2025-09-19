@@ -2,23 +2,28 @@
 
 import { useCallback } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
+import { useLocale } from 'next-intl';
 
 export const useSwitchLocale = () => {
   const router = useRouter();
   const pathname = usePathname();
+  const currentLocale = useLocale();
 
   const switchLocale = useCallback(
-    (currentLocale: string, targetLocale?: string) => {
-      const newLocale = targetLocale || (currentLocale === 'en' ? 'ru' : 'en');
-
+    (targetLocale: string) => {
       const currentState = {
         scrollY: window.scrollY,
       };
 
-      const newPath =
-        pathname?.replace(`/${currentLocale}`, `/${newLocale}`) || '/';
+      let newPath = pathname || '/';
 
-      document.cookie = `NEXT_LOCALE=${newLocale}; max-age=${365 * 24 * 60 * 60}; path=/`;
+      if (pathname && pathname.startsWith(`/${currentLocale}`)) {
+        newPath = pathname.replace(`/${currentLocale}`, `/${targetLocale}`);
+      } else {
+        newPath = `/${targetLocale}${pathname}`;
+      }
+
+      document.cookie = `NEXT_LOCALE=${targetLocale}; max-age=${365 * 24 * 60 * 60}; path=/`;
 
       router.push(newPath);
 
@@ -26,7 +31,7 @@ export const useSwitchLocale = () => {
         window.scrollTo(0, currentState.scrollY);
       }, 100);
     },
-    [pathname, router]
+    [pathname, router, currentLocale]
   );
 
   return switchLocale;
