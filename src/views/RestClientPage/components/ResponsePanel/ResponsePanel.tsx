@@ -1,5 +1,6 @@
 import React from 'react';
 import { Typography, Alert } from 'antd';
+import { useTranslations } from 'next-intl';
 import JsonEditor from '@/components/JsonEditor/JsonEditor';
 import { ResponseData } from '../../types';
 import styles from './ResponsePanel.module.css';
@@ -17,6 +18,7 @@ export default function ResponsePanel({
   error,
   isLoading,
 }: ResponsePanelProps) {
+  const t = useTranslations('RestClientPage');
   const responseText = error
     ? `Error: ${error}`
     : response
@@ -25,7 +27,7 @@ export default function ResponsePanel({
 
   return (
     <div className={styles['response-panel']}>
-      <Title level={4}>Response</Title>
+      <Title level={4}>{t('response')}</Title>
 
       {error && (
         <Alert
@@ -63,9 +65,7 @@ export default function ResponsePanel({
       )}
 
       {!response && !error && !isLoading && (
-        <Text type="secondary">
-          No response yet. Send a request to see results.
-        </Text>
+        <Text type="secondary">{t('noResponse')}</Text>
       )}
     </div>
   );

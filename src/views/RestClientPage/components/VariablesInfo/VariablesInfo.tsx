@@ -1,5 +1,6 @@
 import React from 'react';
 import { Typography } from 'antd';
+import { useTranslations } from 'next-intl';
 import { Variable, hasVariables } from '@/utils/variablesUtils';
 import styles from './VariablesInfo.module.css';
 
@@ -18,6 +19,7 @@ export default function VariablesInfo({
   body,
   variables,
 }: VariablesInfoProps) {
+  const t = useTranslations('RestClientPage');
   const availableVariables =
     variables.map((v) => `{{${v.name}}}`).join(', ') || 'None';
   const hasVars =
@@ -27,17 +29,17 @@ export default function VariablesInfo({
 
   return (
     <div className={styles['variables-info']}>
-      <Title level={4}>Variables Information</Title>
+      <Title level={4}>{t('variablesInfo')}</Title>
       <Text type="secondary">
-        Use variables with format: <code>{'{{variableName}}'}</code>
+        {t('variablesFormat')} <code>{'{{variableName}}'}</code>
       </Text>
       <br />
-      <Text type="secondary">Available variables: {availableVariables}</Text>
+      <Text type="secondary">
+        {t('availableVariables')} {availableVariables}
+      </Text>
       {hasVars && (
         <div className={styles['warning-text']}>
-          <Text type="warning">
-            Contains variables that will be interpolated
-          </Text>
+          <Text type="warning">{t('containsVariables')}</Text>
         </div>
       )}
     </div>

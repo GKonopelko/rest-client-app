@@ -1,5 +1,6 @@
 import React from 'react';
 import { Typography } from 'antd';
+import { useTranslations } from 'next-intl';
 import JsonEditor from '@/components/JsonEditor/JsonEditor';
 import styles from './BodyPanel.module.css';
 
@@ -16,9 +17,11 @@ export default function BodyPanel({
   onChange,
   readOnly,
 }: BodyPanelProps) {
+  const t = useTranslations('RestClientPage');
+
   return (
     <div className={styles['body-panel']}>
-      <Title level={4}>Body</Title>
+      <Title level={4}>{t('body')}</Title>
       <JsonEditor
         value={value}
         onChange={onChange}

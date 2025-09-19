@@ -1,3 +1,4 @@
+// RequestPanel.tsx - небольшая корректировка для использования переводов
 import React, { memo, useCallback } from 'react';
 import { Button, Space } from 'antd';
 import { SendOutlined } from '@ant-design/icons';

@@ -78,7 +78,15 @@
     "submitButton": "Send",
     "inputError": "URL is required",
     "requestSuccess": "Request completed successfully",
-    "requestFailed": "Request failed: "
+    "requestFailed": "Request failed: ",
+    "headers": "Headers",
+    "body": "Body",
+    "response": "Response",
+    "variablesInfo": "Variables Information",
+    "variablesFormat": "Use variables with format:",
+    "availableVariables": "Available variables:",
+    "containsVariables": "Contains variables that will be interpolated",
+    "noResponse": "No response yet. Send a request to see results."
   },
   "HistoryPage": {},
   "VariablesPage": {

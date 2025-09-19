@@ -78,7 +78,15 @@
     "submitButton": "Отправить",
     "inputError": "URL обязателен для заполнения",
     "requestSuccess": "Запрос успешно выполнен",
-    "requestFailed": "Ошибка запроса: "
+    "requestFailed": "Ошибка запроса: ",
+    "headers": "Заголовки",
+    "body": "Тело",
+    "response": "Ответ",
+    "variablesInfo": "Информация о переменных",
+    "variablesFormat": "Используйте переменные в формате:",
+    "availableVariables": "Доступные переменные:",
+    "containsVariables": "Содержит переменные, которые будут интерполированы",
+    "noResponse": "Ответа пока что нетути. Отправьте запрос, чтобы увидеть результаты."
   },
   "HistoryPage": {},
   "VariablesPage": {
