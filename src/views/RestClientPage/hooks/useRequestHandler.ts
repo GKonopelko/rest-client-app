@@ -6,9 +6,15 @@ import { Variable } from '@/utils/variablesUtils';
 
 interface UseRequestHandlerProps {
   variables: Variable[];
+  onSuccess?: (response: ResponseData) => void;
+  onError?: (error: string) => void;
 }
 
-export const useRequestHandler = ({ variables }: UseRequestHandlerProps) => {
+export const useRequestHandler = ({
+  variables,
+  onSuccess,
+  onError,
+}: UseRequestHandlerProps) => {
   const [response, setResponse] = useState<ResponseData>();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>();
@@ -28,6 +34,7 @@ export const useRequestHandler = ({ variables }: UseRequestHandlerProps) => {
     async (request: RequestData) => {
       setIsLoading(true);
       setError(undefined);
+      setResponse(undefined);
 
       try {
         const interpolatedRequest = {
@@ -39,22 +46,38 @@ export const useRequestHandler = ({ variables }: UseRequestHandlerProps) => {
 
         const result = await executeRequest(interpolatedRequest);
 
-        if (result.status === 0) {
-          throw new Error(result.body || 'Network connection failed');
+        if (result.status >= 400 || result.status === 0) {
+          const errorMessage =
+            result.status === 0
+              ? `Network Error: ${result.body}`
+              : `HTTP ${result.status}: ${result.statusText || 'Request failed'}`;
+
+          setError(errorMessage);
+          onError?.(errorMessage);
+        } else {
+          setResponse(result);
+          onSuccess?.(result);
         }
 
-        setResponse(result);
         return result;
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : 'Unknown error';
         setError(errorMessage);
-        throw new Error(errorMessage);
+        onError?.(errorMessage);
+
+        return {
+          status: 0,
+          statusText: 'Exception',
+          headers: {},
+          body: errorMessage,
+          time: 0,
+        };
       } finally {
         setIsLoading(false);
       }
     },
-    [variables]
+    [variables, onSuccess, onError]
   );
 
   return { response, isLoading, error, execute };

@@ -14,7 +14,7 @@ import VariablesInfo from './components/VariablesInfo/VariablesInfo';
 import { useRequestHandler } from './hooks/useRequestHandler';
 import { useVariables } from './hooks/useVariables';
 import { useUrlSync } from './hooks/useUrlSync';
-import { RequestData, Header } from './types';
+import { RequestData, Header, ResponseData } from './types';
 import {
   headersArrayToObject,
   headersObjectToArray,
@@ -50,11 +50,29 @@ const RestClientPage = memo(
     const [headers, setHeaders] = useState<Header[]>([]);
 
     const { variables } = useVariables();
+    const t = useTranslations('RestClientPage');
+
+    const handleResult = useCallback(
+      (result: ResponseData) => {
+        if (result.status >= 400 || result.status === 0) {
+          const errorMsg =
+            result.status === 0
+              ? `Network Error: ${result.body}`
+              : `HTTP ${result.status}: ${result.statusText || 'Request failed'}`;
+
+          message.error(t('requestFailed') + errorMsg);
+        } else {
+          message.success(t('requestSuccess'));
+        }
+      },
+      [t]
+    );
+
     const { response, isLoading, error, execute } = useRequestHandler({
       variables,
     });
+
     const { updateUrl } = useUrlSync();
-    const t = useTranslations('RestClientPage');
 
     useEffect(() => {
       setIsMounted(true);
@@ -135,20 +153,13 @@ const RestClientPage = memo(
         setRequest((prev) => ({ ...prev, url: requestUrl }));
 
         setTimeout(() => {
-          execute(request);
+          execute({ ...request, url: requestUrl }).then(handleResult);
         }, 100);
         return;
       }
 
-      try {
-        await execute(request);
-        message.success(t('requestSuccess'));
-      } catch (err) {
-        const errorMessage =
-          err instanceof Error ? err.message : 'Unknown error';
-        message.error(t('requestFailed') + errorMessage);
-      }
-    }, [request, execute, t]);
+      execute(request).then(handleResult);
+    }, [request, execute, t, handleResult]);
 
     const updateRequest = useCallback((updates: Partial<RequestData>) => {
       setRequest((prev) => ({ ...prev, ...updates }));
