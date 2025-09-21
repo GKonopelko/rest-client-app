@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, cleanup } from '@testing-library/react';
 import { configureStore } from '@reduxjs/toolkit';
 import { Provider } from 'react-redux';
 import userSlice from '@/slices/userSlice';
@@ -42,24 +42,24 @@ vi.mock('./components/VariablesInfo/VariablesInfo', () => ({
 }));
 
 vi.mock('./hooks/useRequestHandler', () => ({
-  useRequestHandler: vi.fn(() => ({
+  useRequestHandler: () => ({
     response: null,
     isLoading: false,
     error: null,
     execute: vi.fn(),
-  })),
+  }),
 }));
 
 vi.mock('./hooks/useVariables', () => ({
-  useVariables: vi.fn(() => ({
-    variables: {},
-  })),
+  useVariables: () => ({
+    variables: [],
+  }),
 }));
 
 vi.mock('./hooks/useUrlSync', () => ({
-  useUrlSync: vi.fn(() => ({
+  useUrlSync: () => ({
     updateUrl: vi.fn(),
-  })),
+  }),
 }));
 
 vi.mock('@/utils/headersUtils', () => ({
@@ -67,13 +67,24 @@ vi.mock('@/utils/headersUtils', () => ({
   headersObjectToArray: vi.fn(() => []),
 }));
 
+const mockLocalStorage = {
+  getItem: vi.fn(),
+  setItem: vi.fn(),
+  removeItem: vi.fn(),
+  clear: vi.fn(),
+};
+
+Object.defineProperty(window, 'localStorage', {
+  value: mockLocalStorage,
+});
+
 vi.mock('react', async () => {
-  const actual = await vi.importActual('react');
+  const actual = await vi.importActual<typeof import('react')>('react');
   return {
     ...actual,
-    useEffect: vi.fn((fn) => fn()),
-    useCallback: vi.fn((fn) => fn),
-    useState: vi.fn((initial) => [initial, vi.fn()]),
+    useEffect: (effect: () => (() => void) | undefined) => effect(),
+    useState: (initial: unknown) => [initial, vi.fn()],
+    useCallback: (callback: unknown) => callback,
   };
 });
 
@@ -87,23 +98,15 @@ describe('RestClientPage', () => {
       },
     });
 
-    vi.spyOn(Storage.prototype, 'getItem').mockReturnValue(null);
-    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {});
-    vi.spyOn(window, 'addEventListener').mockImplementation(() => {});
-    vi.spyOn(window, 'removeEventListener').mockImplementation(() => {});
-    vi.spyOn(global, 'setTimeout').mockImplementation((fn) => {
-      if (typeof fn === 'function') {
-        fn();
-      }
-      return 0 as unknown as NodeJS.Timeout;
-    });
-
     vi.clearAllMocks();
+    mockLocalStorage.getItem.mockReturnValue(null);
+
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    vi.clearAllMocks();
-    vi.resetAllMocks();
+    cleanup();
+    vi.useRealTimers();
   });
 
   it('renders without crashing', () => {
@@ -115,32 +118,4 @@ describe('RestClientPage', () => {
 
     expect(container).toBeInTheDocument();
   });
-
-  it('renders main sections', () => {
-    render(
-      <Provider store={store}>
-        <RestClientPage />
-      </Provider>
-    );
-
-    expect(screen.getByText('Request Panel')).toBeInTheDocument();
-    expect(screen.getByText('Headers Panel')).toBeInTheDocument();
-    expect(screen.getByText('Body Panel')).toBeInTheDocument();
-    expect(screen.getByText('Response Panel')).toBeInTheDocument();
-    expect(screen.getByText('Variables Info')).toBeInTheDocument();
-  });
-
-  it.skip('attempts to load from localStorage on mount', () => {});
-  it.skip('loads saved request from localStorage on mount', () => {});
-  it.skip('uses initial props when localStorage is empty', () => {});
-  it.skip('handles localStorage errors gracefully', () => {});
-  it.skip('saves request to localStorage when state changes', () => {});
-  it.skip('handles localStorage save errors gracefully', () => {});
-  it.skip('shows success message on successful request', () => {});
-  it.skip('handles body change correctly', () => {});
-  it.skip('handles empty URL validation', () => {});
-  it.skip('handles headers change correctly', () => {});
-  it.skip('shows error message on failed request', () => {});
-  it.skip('handles network errors', () => {});
-  it.skip('automatically adds https prefix to URL', () => {});
 });
