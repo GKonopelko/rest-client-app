@@ -137,10 +137,8 @@ describe('LanguageSwitcher Component', () => {
       return translations[key] || key;
     });
 
-    // Mock dispatchEvent to track calls
     const dispatchEventSpy = vi.spyOn(window, 'dispatchEvent');
 
-    // Mock useSwitchLocale to dispatch the event when called
     mockSwitchLocale.mockImplementation((locale: string) => {
       window.dispatchEvent(
         new CustomEvent('localechange', {
@@ -156,13 +154,11 @@ describe('LanguageSwitcher Component', () => {
     expect(mockSwitchLocale).toHaveBeenCalledWith('ru');
     expect(dispatchEventSpy).toHaveBeenCalled();
 
-    // Get the actual event that was dispatched
     const dispatchedEvent = dispatchEventSpy.mock.calls[0][0] as CustomEvent;
 
     expect(dispatchedEvent.type).toBe('localechange');
     expect(dispatchedEvent.detail).toEqual({ from: 'en', to: 'ru' });
 
-    // Clean up
     dispatchEventSpy.mockRestore();
   });
 

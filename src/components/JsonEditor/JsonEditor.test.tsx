@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-// Только самые необходимые моки
 vi.mock('@monaco-editor/react', () => ({
   default: () => <div>Editor</div>,
 }));
