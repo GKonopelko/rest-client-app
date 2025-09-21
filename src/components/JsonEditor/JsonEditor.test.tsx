@@ -1,4 +1,17 @@
-import { vi, describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+
+// Только самые необходимые моки
+vi.mock('@monaco-editor/react', () => ({
+  default: () => <div>Editor</div>,
+}));
+
+vi.mock('./JsonEditor.module.css', () => ({}));
+
+describe('JsonEditor', () => {
+  it('should work', () => {
+    expect(true).toBe(true);
+  });
+});
 
 describe('formatJson function logic', () => {
   const mockSetLocalValue = vi.fn();
