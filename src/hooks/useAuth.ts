@@ -13,7 +13,7 @@ export const useAuth = () => {
   useEffect(() => {
     const unsubscribe = onIdTokenChanged(auth, async (user) => {
       if (user) {
-        const token = await user.getIdToken(); // всегда актуальный токен
+        const token = await user.getIdToken();
 
         await fetch('/api/setToken', {
           method: 'POST',
