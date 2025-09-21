@@ -5,7 +5,7 @@ export interface RequestData {
   body: string;
 }
 
-const encodeUnicode = (str: string): string => {
+export const encodeUnicode = (str: string): string => {
   try {
     if (!str) return '';
 
@@ -20,7 +20,7 @@ const encodeUnicode = (str: string): string => {
   }
 };
 
-const decodeUnicode = (str: string): string => {
+export const decodeUnicode = (str: string): string => {
   try {
     if (!str) return '';
 
