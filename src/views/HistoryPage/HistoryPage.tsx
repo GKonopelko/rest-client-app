@@ -9,6 +9,7 @@ import { fetchHistory } from '@/lib/firebase/historyService';
 import { useEffect, useState } from 'react';
 import { Timestamp } from 'firebase/firestore';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 
 interface FirestoreHistoryItem {
   id: string;
@@ -38,6 +39,7 @@ interface HistoryRecord {
 export default function HistoryPage() {
   const userId = useSelector((state: RootState) => selectUserId(state)) || '';
   const [data, setData] = useState<HistoryRecord[]>([]);
+  const t = useTranslations('HistoryPage');
 
   useEffect(() => {
     if (!userId) return;
@@ -67,20 +69,24 @@ export default function HistoryPage() {
   }, [userId]);
 
   const columns = [
-    { title: 'Timestamp', dataIndex: 'timestamp', key: 'timestamp' },
-    { title: 'URL', dataIndex: 'url', key: 'url' },
-    { title: 'Method', dataIndex: 'method', key: 'method' },
-    { title: 'Status code', dataIndex: 'statusCode', key: 'statusCode' },
-    { title: 'Request size', dataIndex: 'requestSize', key: 'requestSize' },
-    { title: 'Response size', dataIndex: 'responseSize', key: 'responseSize' },
-    { title: 'Latency', dataIndex: 'latency', key: 'latency' },
-    { title: 'Error', dataIndex: 'error', key: 'error' },
+    { title: t('timestamp'), dataIndex: 'timestamp', key: 'timestamp' },
+    { title: t('url'), dataIndex: 'url', key: 'url' },
+    { title: t('method'), dataIndex: 'method', key: 'method' },
+    { title: t('statusCode'), dataIndex: 'statusCode', key: 'statusCode' },
+    { title: t('requestSize'), dataIndex: 'requestSize', key: 'requestSize' },
+    {
+      title: t('responseSize'),
+      dataIndex: 'responseSize',
+      key: 'responseSize',
+    },
+    { title: t('latency'), dataIndex: 'latency', key: 'latency' },
+    { title: t('error'), dataIndex: 'error', key: 'error' },
   ];
 
   return (
     <div className={styles.page}>
       <section className={styles.content}>
-        <h1>History</h1>
+        <h1>{t('title')}</h1>
 
         {data.length ? (
           <Table
@@ -101,9 +107,9 @@ export default function HistoryPage() {
           />
         ) : (
           <div>
-            <span>You have not sent any requests yet, try </span>
+            <span>{t('annotation')} </span>
             <Link href="/rest-client" style={{ textDecoration: 'underline' }}>
-              Rest client
+              {t('restClientLink')}
             </Link>
           </div>
         )}
