@@ -1,7 +1,7 @@
 import User from '@/models/User';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-type UserState = {
+export type UserState = {
   name: string | null;
   email: string | null;
   token: string | null;

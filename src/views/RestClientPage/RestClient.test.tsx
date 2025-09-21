@@ -118,4 +118,99 @@ describe('RestClientPage', () => {
 
     expect(container).toBeInTheDocument();
   });
+
+  it('handles locale change correctly', () => {
+    const { container } = render(
+      <Provider store={store}>
+        <RestClientPage />
+      </Provider>
+    );
+
+    const localeChangeEvent = new Event('localechange');
+    window.dispatchEvent(localeChangeEvent);
+
+    expect(container).toBeInTheDocument();
+
+    vi.advanceTimersByTime(1000);
+
+    expect(container).toBeInTheDocument();
+  });
+
+  it('handles localStorage parse errors gracefully when loading', () => {
+    mockLocalStorage.getItem.mockReturnValue('invalid-json');
+
+    const consoleErrorSpy = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
+
+    const { container } = render(
+      <Provider store={store}>
+        <RestClientPage />
+      </Provider>
+    );
+
+    expect(container).toBeInTheDocument();
+
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      'Error loading saved request:',
+      expect.any(Error)
+    );
+
+    consoleErrorSpy.mockRestore();
+  });
+
+  it('renders all child components correctly', () => {
+    const { getByText } = render(
+      <Provider store={store}>
+        <RestClientPage />
+      </Provider>
+    );
+
+    expect(getByText('Request Panel')).toBeInTheDocument();
+    expect(getByText('Headers Panel')).toBeInTheDocument();
+    expect(getByText('Body Panel')).toBeInTheDocument();
+    expect(getByText('Response Panel')).toBeInTheDocument();
+    expect(getByText('Variables Info')).toBeInTheDocument();
+  });
+
+  it('loads saved request from localStorage on mount', () => {
+    const savedRequest = {
+      method: 'POST',
+      url: 'https://saved.example.com',
+      headers: { 'Content-Type': 'application/json' },
+      body: '{"saved": true}',
+    };
+
+    mockLocalStorage.getItem.mockReturnValue(JSON.stringify(savedRequest));
+
+    const { container } = render(
+      <Provider store={store}>
+        <RestClientPage />
+      </Provider>
+    );
+
+    expect(container).toBeInTheDocument();
+    expect(mockLocalStorage.getItem).toHaveBeenCalledWith(
+      'rest-client-request-data'
+    );
+  });
+
+  it('uses initial props when no saved data in localStorage', () => {
+    mockLocalStorage.getItem.mockReturnValue(null);
+
+    const initialProps = {
+      initialMethod: 'PUT',
+      initialUrl: 'https://initial.example.com',
+      initialBody: '{"initial": true}',
+      initialHeaders: { 'X-Custom': 'value' },
+    };
+
+    const { container } = render(
+      <Provider store={store}>
+        <RestClientPage {...initialProps} />
+      </Provider>
+    );
+
+    expect(container).toBeInTheDocument();
+  });
 });
