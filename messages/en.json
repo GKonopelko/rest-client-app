@@ -6,6 +6,12 @@
     "localeRu": "Русский",
     "localeEn": "English"
   },
+  "NotFoundPage": {
+    "title": "Not Found Page",
+    "imageHover": "404 Not found",
+    "annotation": "You can go to the",
+    "homeLink": "home page"
+  },
   "MainPage": {
     "welcome": "Welcome!",
     "welcomeDescription": "Sign in or create an account to start using our REST Client",
@@ -88,7 +94,19 @@
     "containsVariables": "Contains variables that will be interpolated",
     "noResponse": "No response yet. Send a request to see results."
   },
-  "HistoryPage": {},
+  "HistoryPage": {
+    "title": "History",
+    "annotation": "You have not sent any requests yet, try",
+    "restClientLink": "Rest client",
+    "timestamp": "Timestamp",
+    "url": "URL",
+    "method": "Method",
+    "statusCode": "Status code",
+    "requestSize": "Request size, B",
+    "responseSize": "Response size, B",
+    "latency": "Latency",
+    "error": "Error"
+  },
   "VariablesPage": {
     "title": "Variables",
     "description": "Manage your environment variables for API requests.",

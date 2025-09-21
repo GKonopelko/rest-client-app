@@ -22,6 +22,7 @@ const userSlice = createSlice({
   initialState,
   selectors: {
     selectUserName: (state) => state.name,
+    selectUserId: (state) => state.id,
   },
   reducers: {
     setUser(state, action: PayloadAction<User>) {
@@ -44,7 +45,7 @@ const userSlice = createSlice({
   },
 });
 
-export const { selectUserName } = userSlice.selectors;
+export const { selectUserName, selectUserId } = userSlice.selectors;
 export const { setUser, removeUser, setUserToken } = userSlice.actions;
 
 export default userSlice.reducer;

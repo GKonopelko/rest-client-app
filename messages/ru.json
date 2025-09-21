@@ -6,6 +6,12 @@
     "localeRu": "Русский",
     "localeEn": "English"
   },
+  "NotFoundPage": {
+    "title": "Страница не найдена",
+    "imageHover": "404 Не найдено",
+    "annotation": "Вы можете перейти на",
+    "homeLink": "главную страницу"
+  },
   "MainPage": {
     "welcome": "Добро пожаловать!",
     "welcomeDescription": "Войдите или создайте аккаунт, чтобы начать использовать наш REST Клиент",
@@ -86,9 +92,21 @@
     "variablesFormat": "Используйте переменные в формате:",
     "availableVariables": "Доступные переменные:",
     "containsVariables": "Содержит переменные, которые будут интерполированы",
-    "noResponse": "Ответа пока что нетути. Отправьте запрос, чтобы увидеть результаты."
+    "noResponse": "Ответа пока что нет. Отправьте запрос, чтобы увидеть результаты."
   },
-  "HistoryPage": {},
+  "HistoryPage": {
+    "title": "История",
+    "annotation": "Вы ещё не отправляли запросы, попробуйте",
+    "restClientLink": "REST-клиент",
+    "timestamp": "Время отправления",
+    "url": "URL",
+    "method": "Метод",
+    "statusCode": "Код ответа",
+    "requestSize": "Размер запроса, B",
+    "responseSize": "Размер ответа, B",
+    "latency": "Задержка",
+    "error": "Ошибка"
+  },
   "VariablesPage": {
     "title": "Переменные",
     "description": "Управляйте переменными окружения для API запросов.",

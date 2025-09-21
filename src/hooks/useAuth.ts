@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { getAuth, onIdTokenChanged } from 'firebase/auth';
 import { useDispatch } from 'react-redux';
-import { setUser, removeUser, setUserToken } from '@/slices/userSlice';
+import { setUser, removeUser } from '@/slices/userSlice';
 import { app } from '@/lib/firebase/firebase';
 
 export const useAuth = () => {
@@ -35,27 +35,8 @@ export const useAuth = () => {
       }
     });
 
-    const interval = setInterval(
-      async () => {
-        const user = auth.currentUser;
-        if (user) {
-          const token = await user.getIdToken(true);
-
-          dispatch(setUserToken(token));
-
-          await fetch('/api/setToken', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ token }),
-          });
-        }
-      },
-      50 * 60 * 1000
-    );
-
     return () => {
       unsubscribe();
-      clearInterval(interval);
     };
   }, [auth, dispatch]);
 };
