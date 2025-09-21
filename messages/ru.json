@@ -98,7 +98,7 @@
     "title": "История",
     "annotation": "Вы ещё не отправляли запросы, попробуйте",
     "restClientLink": "REST-клиент",
-    "timestamp": "Вреям отправления",
+    "timestamp": "Время отправления",
     "url": "URL",
     "method": "Метод",
     "statusCode": "Код ответа",

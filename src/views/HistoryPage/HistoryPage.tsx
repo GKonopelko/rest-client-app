@@ -10,6 +10,7 @@ import { useEffect, useState } from 'react';
 import { Timestamp } from 'firebase/firestore';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import { useRouter } from 'next/navigation';
 
 interface FirestoreHistoryItem {
   id: string;
@@ -22,6 +23,8 @@ interface FirestoreHistoryItem {
   requestSize?: number;
   responseSize?: number;
   latency?: number;
+  requestHeaders?: string;
+  requestBody?: string;
 }
 
 interface HistoryRecord {
@@ -34,11 +37,14 @@ interface HistoryRecord {
   requestSize: number;
   responseSize: number;
   latency: number;
+  requestHeaders: string;
+  requestBody: string;
 }
 
 export default function HistoryPage() {
   const userId = useSelector((state: RootState) => selectUserId(state)) || '';
   const [data, setData] = useState<HistoryRecord[]>([]);
+  const router = useRouter();
   const t = useTranslations('HistoryPage');
 
   useEffect(() => {
@@ -57,6 +63,8 @@ export default function HistoryPage() {
           requestSize: item.requestSize ?? 0,
           responseSize: item.responseSize ?? 0,
           latency: item.latency ?? 0,
+          requestHeaders: item.requestHeaders ?? '',
+          requestBody: item.requestBody ?? '',
         }));
 
         setData(tableData);
@@ -96,10 +104,21 @@ export default function HistoryPage() {
             scroll={{ x: 'max-content' }}
             pagination={{ pageSize: 10 }}
             onRow={(record) => {
-              console.log(record);
               return {
                 onClick: () => {
-                  window.location.href = `/rest-client/${record.method}/`;
+                  const STORAGE_KEY = 'rest-client-request-data';
+
+                  localStorage.setItem(
+                    STORAGE_KEY,
+                    JSON.stringify({
+                      method: record.method,
+                      url: record.url,
+                      headers: JSON.parse(record.requestHeaders),
+                      body: JSON.parse(record.requestBody),
+                    })
+                  );
+
+                  router.push('/rest-client');
                 },
               };
             }}

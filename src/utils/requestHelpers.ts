@@ -9,6 +9,8 @@ export interface RequestAnalytics {
   error: string;
   requestSize: number;
   responseSize: number;
+  requestBody: string;
+  requestHeaders: string;
 }
 
 export interface RequestResult {
@@ -27,6 +29,8 @@ export const executeRequest = async (
   ).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(
     now.getMinutes()
   ).padStart(2, '0')}`;
+  const requestBody = JSON.stringify(request.body);
+  const requestHeaders = JSON.stringify(request.headers);
 
   const encoder = new TextEncoder();
 
@@ -49,7 +53,7 @@ export const executeRequest = async (
     });
 
     const requestPayload = request.body ?? '';
-    const requestSize = encoder.encode(requestPayload).length; // ✅ размер запроса в байтах
+    const requestSize = encoder.encode(requestPayload).length;
     const responseSize = encoder.encode(body).length;
 
     const responseData: ResponseData = {
@@ -59,20 +63,6 @@ export const executeRequest = async (
       body,
       time: latency,
     };
-
-    console.log({
-      response: responseData,
-      analytics: {
-        timestamp,
-        latency,
-        url: request.url,
-        method: request.method,
-        statusCode: response.status,
-        error: response.status >= 400 ? response.statusText : '',
-        requestSize,
-        responseSize,
-      },
-    });
 
     return {
       response: responseData,
@@ -85,10 +75,11 @@ export const executeRequest = async (
         error: response.status >= 400 ? response.statusText : '',
         requestSize,
         responseSize,
+        requestBody,
+        requestHeaders,
       },
     };
   } catch (error) {
-    console.log(error);
     const latency = Date.now() - startTime;
     const errorMessage =
       error instanceof Error ? error.message : 'Network request failed';
@@ -105,20 +96,6 @@ export const executeRequest = async (
     const requestSize = encoder.encode(requestPayload).length;
     const responseSize = 0;
 
-    console.log({
-      response: responseData,
-      analytics: {
-        timestamp,
-        latency,
-        url: request.url,
-        method: request.method,
-        statusCode: 0,
-        error: errorMessage,
-        requestSize,
-        responseSize,
-      },
-    });
-
     return {
       response: responseData,
       analytics: {
@@ -130,6 +107,8 @@ export const executeRequest = async (
         error: errorMessage,
         requestSize,
         responseSize,
+        requestBody,
+        requestHeaders,
       },
     };
   }
