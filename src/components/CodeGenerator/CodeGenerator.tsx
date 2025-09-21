@@ -21,7 +21,6 @@ interface CodeGeneratorProps {
   variables?: Variable[];
 }
 
-// Выносим константы наружу - они никогда не меняются
 const ERROR_MESSAGES = {
   invalidJsonHeaders: 'Invalid JSON in headers',
   interpolationError: 'Error interpolating variables',
@@ -50,7 +49,6 @@ export default function CodeGenerator({
     [externalVariables]
   );
 
-  // Вычисляем интерполированные значения один раз при открытии модалки
   const interpolatedValues = useMemo(() => {
     try {
       let parsedHeaders = {};
