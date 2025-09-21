@@ -69,7 +69,6 @@ export default function CodeGeneratorModal({
   const methodRef = useRef(method);
   const errorMessagesRef = useRef(errorMessages);
 
-  // Update refs when props change
   useEffect(() => {
     interpolatedValuesRef.current = interpolatedValues;
     methodRef.current = method;
@@ -164,7 +163,7 @@ export default function CodeGeneratorModal({
       setIsGenerating(false);
       isGeneratingRef.current = false;
     }
-  }, []); // Empty dependency array since we use refs
+  }, []);
 
   useEffect(() => {
     if (!isVisible) return;

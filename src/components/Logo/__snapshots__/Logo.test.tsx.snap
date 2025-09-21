@@ -1,0 +1,19 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Logo Component > should match snapshot 1`] = `
+<svg
+  height="60"
+  viewBox="0 0 200 60"
+  width="180"
+>
+  <text
+    fill="#1890ff"
+    font-size="24"
+    font-weight="700"
+    x="5"
+    y="35"
+  >
+    REST SPB
+  </text>
+</svg>
+`;

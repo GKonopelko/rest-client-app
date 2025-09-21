@@ -79,7 +79,8 @@ const RestClientPage = memo(
 
       const handleLocaleChange = () => {
         setIsLocaleChanging(true);
-        setTimeout(() => setIsLocaleChanging(false), 1000);
+        const timeoutId = setTimeout(() => setIsLocaleChanging(false), 1000);
+        return () => clearTimeout(timeoutId);
       };
 
       window.addEventListener('localechange', handleLocaleChange);

@@ -1,4 +1,3 @@
-// Кэш для хранения сгенерированного кода
 const codeCache = new Map<string, string>();
 
 export function generateCode(
@@ -8,10 +7,8 @@ export function generateCode(
   headers: Record<string, string>,
   body: string
 ): string {
-  // Создаем уникальный ключ для кэша
   const cacheKey = `${language}-${method}-${url}-${JSON.stringify(headers)}-${body}`;
 
-  // Проверяем кэш перед генерацией
   const cachedCode = codeCache.get(cacheKey);
   if (cachedCode !== undefined) {
     return cachedCode;
@@ -61,7 +58,6 @@ export function generateCode(
         result = 'Unsupported language';
     }
 
-    // Сохраняем результат в кэш
     codeCache.set(cacheKey, result);
     return result;
   } catch (_error) {
@@ -133,8 +129,8 @@ function generateJavascriptFetchCode(
 
   code += '\n})';
   code += '\n  .then(response => response.json())';
-  code += '\n  .then(data => console.log(data))';
-  code += '\n  .catch(error => console.error("Error:", error));';
+  code += '\n  .then(data => {})';
+  code += '\n  .catch(error => {});';
 
   return code;
 }
@@ -163,7 +159,6 @@ function generateJavascriptXHRCode(
 
   code += 'xhr.onreadystatechange = function() {\n';
   code += '  if (xhr.readyState === 4) {\n';
-  code += '    console.log(xhr.responseText);\n';
   code += '  }\n';
   code += '};\n';
 
@@ -203,7 +198,6 @@ function generateNodeJSCode(
   code += `    data += chunk;\n`;
   code += `  });\n`;
   code += `  res.on('end', () => {\n`;
-  code += `    console.log(data);\n`;
   code += `  });\n`;
   code += `});\n\n`;
 
@@ -239,8 +233,7 @@ function generatePythonCode(
     code += `data = ${body}\n\n`;
   }
 
-  code += `response = requests.${method.toLowerCase()}(${body && method !== 'GET' && method !== 'HEAD' ? 'url, headers=headers, json=data' : 'url, headers=headers'})\n`;
-  code += `print(response.text)`;
+  code += `response = requests.${method.toLowerCase()}(${body && method !== 'GET' && method !== 'HEAD' ? 'url, headers=headers, json=data' : 'url, headers=headers'})`;
 
   return code;
 }
@@ -293,7 +286,6 @@ function generateJavaCode(
   code += `        }\n`;
   code += `        in.close();\n`;
   code += `        connection.disconnect();\n`;
-  code += `        System.out.println(content.toString());\n`;
   code += `    }\n`;
   code += `}`;
 
@@ -337,7 +329,6 @@ function generateCSharpCode(
 
   code += `        var response = await client.SendAsync(request);\n`;
   code += `        var responseBody = await response.Content.ReadAsStringAsync();\n`;
-  code += `        Console.WriteLine(responseBody);\n`;
   code += `    }\n`;
   code += `}`;
 
@@ -391,18 +382,15 @@ function generateGoCode(
   code += `    }\n`;
   code += `    defer resp.Body.Close()\n\n`;
   code += `    body, _ := ioutil.ReadAll(resp.Body)\n`;
-  code += `    fmt.Println(string(body))\n`;
   code += `}`;
 
   return code;
 }
 
-// Функция для очистки кэша (опционально, для управления памятью)
 export function clearCodeCache(): void {
   codeCache.clear();
 }
 
-// Функция для получения размера кэша (для отладки)
 export function getCodeCacheSize(): number {
   return codeCache.size;
 }
