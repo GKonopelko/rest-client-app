@@ -3,6 +3,9 @@ import { useTranslations } from 'next-intl';
 import CodeGenerator from './CodeGenerator';
 import { beforeEach, describe, expect, it, vi, afterEach } from 'vitest';
 import type { Mock } from 'vitest';
+import CodeGeneratorModal from './CodeGeneratorModal';
+
+vi.mocked(CodeGeneratorModal);
 
 vi.mock('@/utils/variablesUtils', () => ({
   interpolateVariables: vi.fn(),
@@ -166,5 +169,48 @@ describe('CodeGenerator Component', () => {
     renderComponent();
     fireEvent.click(screen.getByText('Generate Code'));
     expect(screen.getByText('Generate Code')).toBeInTheDocument();
+  });
+  it('handles invalid JSON headers and returns error state', () => {
+    const invalidJsonHeaders = 'invalid-json';
+
+    renderComponent({
+      headers: invalidJsonHeaders,
+    });
+
+    fireEvent.click(screen.getByText('Generate Code'));
+
+    expect(interpolateVariables).not.toHaveBeenCalled();
+  });
+
+  it('returns error state when JSON parsing fails for headers', () => {
+    renderComponent({
+      headers: 'invalid-json',
+    });
+
+    fireEvent.click(screen.getByText('Generate Code'));
+
+    expect(interpolateVariables).not.toHaveBeenCalled();
+
+    expect(screen.getByText('Generate Code')).toBeInTheDocument();
+  });
+
+  it('handles invalid JSON headers and provides correct error state to modal', () => {
+    const invalidJsonHeaders = 'invalid-json';
+
+    renderComponent({
+      headers: invalidJsonHeaders,
+    });
+
+    fireEvent.click(screen.getByText('Generate Code'));
+
+    expect(CodeGeneratorModal).toHaveBeenCalled();
+
+    const lastCall = vi.mocked(CodeGeneratorModal).mock.calls[0];
+    const props = lastCall[0];
+
+    expect(props.interpolatedValues.hasUnresolvedVars).toBe(true);
+    expect(props.interpolatedValues.unresolvedVars).toContain(
+      'Invalid JSON in headers'
+    );
   });
 });
