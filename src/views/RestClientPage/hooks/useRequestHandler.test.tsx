@@ -1,14 +1,7 @@
 import { renderHook, act } from '@testing-library/react';
 import { useRequestHandler } from './useRequestHandler';
-import { useUrlSync } from './useUrlSync';
-import { useVariables } from './useVariables';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import type { Mock } from 'vitest';
-import {
-  loadVariablesFromStorage,
-  saveVariablesToStorage,
-  type Variable,
-} from '@/utils/variablesUtils';
 import { executeRequest } from '@/utils/requestHelpers';
 
 vi.mock('@/utils/requestHelpers', () => ({
@@ -17,24 +10,6 @@ vi.mock('@/utils/requestHelpers', () => ({
 
 vi.mock('@/utils/variablesUtils', () => ({
   interpolateVariables: vi.fn((value) => value),
-  loadVariablesFromStorage: vi.fn(() => []),
-  saveVariablesToStorage: vi.fn(),
-}));
-
-const mockReplace = vi.fn();
-vi.mock('next/navigation', () => ({
-  useRouter: vi.fn(() => ({
-    replace: mockReplace,
-  })),
-  usePathname: vi.fn(() => '/'),
-}));
-
-vi.mock('next-intl', () => ({
-  useLocale: vi.fn(() => 'en'),
-}));
-
-vi.mock('@/utils/urlEncoding', () => ({
-  encodeRequestToUrl: vi.fn(() => '/test-url'),
 }));
 
 describe('useRequestHandler', () => {
@@ -170,25 +145,16 @@ describe('useRequestHandler', () => {
     expect(result.current.isLoading).toBe(false);
     expect(onError).toHaveBeenCalledWith('Request failed');
   });
-});
 
-describe('useUrlSync', () => {
-  beforeEach(() => {
-    mockReplace.mockClear();
-  });
+  it('should handle unknown error type', async () => {
+    executeRequestMock.mockRejectedValue('Some string error');
 
-  it('should return updateUrl function', () => {
-    const { result } = renderHook(() => useUrlSync());
+    const { result } = renderHook(() =>
+      useRequestHandler({ variables: [], onSuccess, onError })
+    );
 
-    expect(result.current.updateUrl).toBeDefined();
-    expect(typeof result.current.updateUrl).toBe('function');
-  });
-
-  it('should call router.replace when updateUrl is called', () => {
-    const { result } = renderHook(() => useUrlSync());
-
-    act(() => {
-      result.current.updateUrl({
+    await act(async () => {
+      await result.current.execute({
         method: 'GET',
         url: 'http://test.com',
         headers: {},
@@ -196,46 +162,34 @@ describe('useUrlSync', () => {
       });
     });
 
-    expect(mockReplace).toHaveBeenCalledWith('/test-url', { scroll: false });
-  });
-});
-
-describe('useVariables', () => {
-  it('should initialize with empty variables', () => {
-    const { result } = renderHook(() => useVariables());
-
-    expect(result.current.variables).toEqual([]);
-    expect(typeof result.current.updateVariables).toBe('function');
+    expect(result.current.error).toBe('Unknown error');
+    expect(result.current.isLoading).toBe(false);
+    expect(onError).toHaveBeenCalledWith('Unknown error');
   });
 
-  it('should update variables and save to storage', () => {
-    const saveVariablesToStorageMock = vi.fn();
-    vi.mocked(saveVariablesToStorage).mockImplementation(
-      saveVariablesToStorageMock
+  it('should return error response object when exception occurs', async () => {
+    executeRequestMock.mockRejectedValue(new Error('Request failed'));
+
+    const { result } = renderHook(() =>
+      useRequestHandler({ variables: [], onSuccess, onError })
     );
 
-    const { result } = renderHook(() => useVariables());
-
-    const newVariables: Variable[] = [
-      { id: '1', name: 'test', value: 'value' },
-    ];
-
-    act(() => {
-      result.current.updateVariables(newVariables);
+    let response;
+    await act(async () => {
+      response = await result.current.execute({
+        method: 'GET',
+        url: 'http://test.com',
+        headers: {},
+        body: '',
+      });
     });
 
-    expect(result.current.variables).toEqual(newVariables);
-    expect(saveVariablesToStorageMock).toHaveBeenCalledWith(newVariables);
-  });
-
-  it('should load variables from storage on mount', () => {
-    const savedVariables: Variable[] = [
-      { id: '1', name: 'saved', value: 'value' },
-    ];
-    vi.mocked(loadVariablesFromStorage).mockReturnValue(savedVariables);
-
-    const { result } = renderHook(() => useVariables());
-
-    expect(result.current.variables).toEqual(savedVariables);
+    expect(response).toEqual({
+      status: 0,
+      statusText: 'Exception',
+      headers: {},
+      body: 'Request failed',
+      time: 0,
+    });
   });
 });
