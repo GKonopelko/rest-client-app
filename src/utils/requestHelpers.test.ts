@@ -11,6 +11,7 @@ describe('requestHelpers', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.useFakeTimers();
   });
 
   describe('executeRequest', () => {
@@ -23,6 +24,8 @@ describe('requestHelpers', () => {
       };
 
       global.fetch = vi.fn().mockResolvedValue(mockResponse);
+      const startTime = Date.now();
+      vi.setSystemTime(startTime);
 
       const result = await executeRequest(mockRequest);
 
@@ -33,11 +36,25 @@ describe('requestHelpers', () => {
       });
 
       expect(result).toEqual({
-        status: 200,
-        statusText: 'OK',
-        headers: { 'content-type': 'application/json' },
-        body: '{"data": "test"}',
-        time: expect.any(Number),
+        response: {
+          status: 200,
+          statusText: 'OK',
+          headers: { 'content-type': 'application/json' },
+          body: '{"data": "test"}',
+          time: expect.any(Number),
+        },
+        analytics: {
+          timestamp: expect.any(String),
+          latency: expect.any(Number),
+          url: mockRequest.url,
+          method: mockRequest.method,
+          statusCode: 200,
+          error: '',
+          requestSize: expect.any(Number),
+          responseSize: expect.any(Number),
+          requestBody: JSON.stringify(mockRequest.body),
+          requestHeaders: JSON.stringify(mockRequest.headers),
+        },
       });
     });
 
@@ -57,13 +74,17 @@ describe('requestHelpers', () => {
         body: '{"data": "test"}',
       };
 
-      await executeRequest(requestWithBody);
+      const result = await executeRequest(requestWithBody);
 
       expect(fetch).toHaveBeenCalledWith(requestWithBody.url, {
         method: requestWithBody.method,
         headers: requestWithBody.headers,
         body: '{"data": "test"}',
       });
+
+      expect(result.analytics.requestBody).toBe(
+        JSON.stringify(requestWithBody.body)
+      );
     });
 
     it('should handle network errors', async () => {
@@ -73,11 +94,25 @@ describe('requestHelpers', () => {
       const result = await executeRequest(mockRequest);
 
       expect(result).toEqual({
-        status: 0,
-        statusText: 'Network Error',
-        headers: {},
-        body: 'Network failure',
-        time: expect.any(Number),
+        response: {
+          status: 0,
+          statusText: 'Network Error',
+          headers: {},
+          body: 'Network failure',
+          time: expect.any(Number),
+        },
+        analytics: {
+          timestamp: expect.any(String),
+          latency: expect.any(Number),
+          url: mockRequest.url,
+          method: mockRequest.method,
+          statusCode: 0,
+          error: 'Network failure',
+          requestSize: expect.any(Number),
+          responseSize: 0,
+          requestBody: JSON.stringify(mockRequest.body),
+          requestHeaders: JSON.stringify(mockRequest.headers),
+        },
       });
     });
 
@@ -87,11 +122,25 @@ describe('requestHelpers', () => {
       const result = await executeRequest(mockRequest);
 
       expect(result).toEqual({
-        status: 0,
-        statusText: 'Network Error',
-        headers: {},
-        body: 'Network request failed',
-        time: expect.any(Number),
+        response: {
+          status: 0,
+          statusText: 'Network Error',
+          headers: {},
+          body: 'Network request failed',
+          time: expect.any(Number),
+        },
+        analytics: {
+          timestamp: expect.any(String),
+          latency: expect.any(Number),
+          url: mockRequest.url,
+          method: mockRequest.method,
+          statusCode: 0,
+          error: 'Network request failed',
+          requestSize: expect.any(Number),
+          responseSize: 0,
+          requestBody: JSON.stringify(mockRequest.body),
+          requestHeaders: JSON.stringify(mockRequest.headers),
+        },
       });
     });
   });

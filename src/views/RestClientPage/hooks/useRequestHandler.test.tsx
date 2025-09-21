@@ -3,7 +3,11 @@ import { useRequestHandler } from './useRequestHandler';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import type { Mock } from 'vitest';
 import { executeRequest } from '@/utils/requestHelpers';
+import { Provider } from 'react-redux';
+import { configureStore } from '@reduxjs/toolkit';
+import userSlice from '@/slices/userSlice';
 
+// Моки
 vi.mock('@/utils/requestHelpers', () => ({
   executeRequest: vi.fn(),
 }));
@@ -12,15 +16,41 @@ vi.mock('@/utils/variablesUtils', () => ({
   interpolateVariables: vi.fn((value) => value),
 }));
 
+vi.mock('@/lib/firebase/historyService', () => ({
+  saveRequest: vi.fn(),
+}));
+
+// Создаем полный mock состояния пользователя
+const mockUserState = {
+  userId: 'test-user-id',
+  email: 'test@example.com',
+  name: 'Test User',
+  token: 'test-token',
+  refreshToken: 'test-refresh-token',
+  id: 'test-id',
+  isLoading: false,
+  error: null,
+};
+
 describe('useRequestHandler', () => {
   let executeRequestMock: Mock;
   let onSuccess: Mock;
   let onError: Mock;
+  let store: ReturnType<typeof configureStore>;
 
   beforeEach(() => {
     executeRequestMock = vi.fn();
     onSuccess = vi.fn();
     onError = vi.fn();
+
+    store = configureStore({
+      reducer: {
+        user: userSlice,
+      },
+      preloadedState: {
+        user: mockUserState,
+      },
+    });
 
     vi.mocked(executeRequest).mockImplementation(executeRequestMock);
   });
@@ -29,10 +59,21 @@ describe('useRequestHandler', () => {
     vi.clearAllMocks();
   });
 
-  it('should initialize with default values', () => {
-    const { result } = renderHook(() =>
-      useRequestHandler({ variables: [], onSuccess, onError })
+  const renderHookWithProvider = (
+    props: Parameters<typeof useRequestHandler>[0]
+  ) => {
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <Provider store={store}>{children}</Provider>
     );
+    return renderHook(() => useRequestHandler(props), { wrapper });
+  };
+
+  it('should initialize with default values', () => {
+    const { result } = renderHookWithProvider({
+      variables: [],
+      onSuccess,
+      onError,
+    });
 
     expect(result.current.response).toBeUndefined();
     expect(result.current.isLoading).toBe(false);
@@ -48,11 +89,16 @@ describe('useRequestHandler', () => {
       statusText: 'OK',
       time: 100,
     };
-    executeRequestMock.mockResolvedValue(mockResponse);
+    executeRequestMock.mockResolvedValue({
+      response: mockResponse,
+      analytics: {},
+    });
 
-    const { result } = renderHook(() =>
-      useRequestHandler({ variables: [], onSuccess, onError })
-    );
+    const { result } = renderHookWithProvider({
+      variables: [],
+      onSuccess,
+      onError,
+    });
 
     await act(async () => {
       await result.current.execute({
@@ -77,11 +123,16 @@ describe('useRequestHandler', () => {
       statusText: 'Not Found',
       time: 100,
     };
-    executeRequestMock.mockResolvedValue(mockErrorResponse);
+    executeRequestMock.mockResolvedValue({
+      response: mockErrorResponse,
+      analytics: {},
+    });
 
-    const { result } = renderHook(() =>
-      useRequestHandler({ variables: [], onSuccess, onError })
-    );
+    const { result } = renderHookWithProvider({
+      variables: [],
+      onSuccess,
+      onError,
+    });
 
     await act(async () => {
       await result.current.execute({
@@ -106,11 +157,16 @@ describe('useRequestHandler', () => {
       statusText: '',
       time: 0,
     };
-    executeRequestMock.mockResolvedValue(mockNetworkError);
+    executeRequestMock.mockResolvedValue({
+      response: mockNetworkError,
+      analytics: {},
+    });
 
-    const { result } = renderHook(() =>
-      useRequestHandler({ variables: [], onSuccess, onError })
-    );
+    const { result } = renderHookWithProvider({
+      variables: [],
+      onSuccess,
+      onError,
+    });
 
     await act(async () => {
       await result.current.execute({
@@ -128,9 +184,11 @@ describe('useRequestHandler', () => {
   it('should handle exception', async () => {
     executeRequestMock.mockRejectedValue(new Error('Request failed'));
 
-    const { result } = renderHook(() =>
-      useRequestHandler({ variables: [], onSuccess, onError })
-    );
+    const { result } = renderHookWithProvider({
+      variables: [],
+      onSuccess,
+      onError,
+    });
 
     await act(async () => {
       await result.current.execute({
@@ -149,9 +207,11 @@ describe('useRequestHandler', () => {
   it('should handle unknown error type', async () => {
     executeRequestMock.mockRejectedValue('Some string error');
 
-    const { result } = renderHook(() =>
-      useRequestHandler({ variables: [], onSuccess, onError })
-    );
+    const { result } = renderHookWithProvider({
+      variables: [],
+      onSuccess,
+      onError,
+    });
 
     await act(async () => {
       await result.current.execute({
@@ -170,11 +230,13 @@ describe('useRequestHandler', () => {
   it('should return error response object when exception occurs', async () => {
     executeRequestMock.mockRejectedValue(new Error('Request failed'));
 
-    const { result } = renderHook(() =>
-      useRequestHandler({ variables: [], onSuccess, onError })
-    );
+    const { result } = renderHookWithProvider({
+      variables: [],
+      onSuccess,
+      onError,
+    });
 
-    let response;
+    let response: unknown;
     await act(async () => {
       response = await result.current.execute({
         method: 'GET',
