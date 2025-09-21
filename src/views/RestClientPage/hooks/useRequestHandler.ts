@@ -3,6 +3,10 @@ import { RequestData, ResponseData } from '../types';
 import { executeRequest } from '@/utils/requestHelpers';
 import { interpolateVariables } from '@/utils/variablesUtils';
 import { Variable } from '@/utils/variablesUtils';
+import { saveRequest } from '@/lib/firebase/historyService';
+import { useSelector } from 'react-redux';
+import { selectUserId } from '@/slices/userSlice';
+import { RootState } from '@/store';
 
 interface UseRequestHandlerProps {
   variables: Variable[];
@@ -18,6 +22,7 @@ export const useRequestHandler = ({
   const [response, setResponse] = useState<ResponseData>();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>();
+  const userId = useSelector((state: RootState) => selectUserId(state)) || '';
 
   const interpolateObjectVariables = (
     obj: Record<string, string>,
@@ -44,7 +49,10 @@ export const useRequestHandler = ({
           body: interpolateVariables(request.body, variables),
         };
 
-        const result = await executeRequest(interpolatedRequest);
+        const data = await executeRequest(interpolatedRequest);
+        const result = data.response;
+
+        await saveRequest(userId, data.analytics);
 
         if (result.status >= 400 || result.status === 0) {
           const errorMessage =
@@ -77,7 +85,7 @@ export const useRequestHandler = ({
         setIsLoading(false);
       }
     },
-    [variables, onSuccess, onError]
+    [variables, onSuccess, onError, userId]
   );
 
   return { response, isLoading, error, execute };

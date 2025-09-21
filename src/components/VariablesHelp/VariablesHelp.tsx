@@ -20,7 +20,7 @@ export default function VariablesHelp() {
         <div
           style={{
             padding: '16px',
-            background: '#f5f5f5',
+            background: '#ededed',
             borderRadius: '8px',
           }}
         >
