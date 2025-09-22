@@ -74,9 +74,9 @@ export const RegisterForm = () => {
           message: t('emailAlreadyInUse'),
         });
         return;
+      } else {
+        console.error(error);
       }
-
-      console.error(error);
     }
   };
 

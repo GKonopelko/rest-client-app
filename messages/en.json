@@ -53,7 +53,8 @@
     "passwordPlaceholder": "Enter password",
     "submitButton": "Submit",
     "emptyEmailError": "Email field is required",
-    "emptyPasswordError": "Password field is required"
+    "emptyPasswordError": "Password field is required",
+    "invalidCredentials": "An account with such data does not exist"
   },
   "SignUpPage": {
     "title": "Sign Up",

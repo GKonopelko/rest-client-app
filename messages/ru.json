@@ -53,7 +53,8 @@
     "passwordPlaceholder": "Введите пароль",
     "submitButton": "Отправить",
     "emptyEmailError": "Поле эл. почты обязательно для заполнения",
-    "emptyPasswordError": "Поле пароля обязательно для заполнения"
+    "emptyPasswordError": "Поле пароля обязательно для заполнения",
+    "invalidCredentials": "Учётной записи с такими данными не существует"
   },
   "SignUpPage": {
     "title": "Регистрация",

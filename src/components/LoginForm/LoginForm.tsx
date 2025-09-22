@@ -9,6 +9,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useLoginSchema } from '@/lib/zod/loginSchema';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { FirebaseError } from 'firebase/app';
 
 type FormValues = {
   email: string;
@@ -22,6 +23,7 @@ export const LoginForm = () => {
   const {
     control,
     handleSubmit,
+    setError,
     formState: { errors, isValid },
   } = useForm<FormValues>({
     defaultValues: {
@@ -33,22 +35,38 @@ export const LoginForm = () => {
   });
 
   const submit = async (data: FormValues) => {
-    const fireAuth = getAuth(app);
-    const { user } = await signInWithEmailAndPassword(
-      fireAuth,
-      data.email,
-      data.password
-    );
+    try {
+      const fireAuth = getAuth(app);
+      const { user } = await signInWithEmailAndPassword(
+        fireAuth,
+        data.email,
+        data.password
+      );
 
-    const token = await user.getIdToken();
+      const token = await user.getIdToken();
 
-    await fetch('/api/setToken', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token }),
-    });
+      await fetch('/api/setToken', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token }),
+      });
 
-    router.push('/');
+      router.push('/');
+    } catch (error) {
+      const err = error as FirebaseError;
+
+      if (
+        err.code === 'auth/invalid-credential' ||
+        err.code === 'auth/invalid-email'
+      ) {
+        setError('password', {
+          type: 'manual',
+          message: t('invalidCredentials'),
+        });
+      } else {
+        console.error(error);
+      }
+    }
   };
 
   return (
