@@ -1,0 +1,30 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  position: relative;
+  background-color: #0763b9;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  height: 100%;
+  padding: 1rem 1rem 0 1rem;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  .content {
+    padding-top: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .content {
+    padding-top: calc(60px + 0.5rem);
+    padding: 0.5rem;
+  }
+}

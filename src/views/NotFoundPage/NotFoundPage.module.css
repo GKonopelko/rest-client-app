@@ -1,0 +1,31 @@
+.page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  flex: 1;
+  gap: 30px;
+  height: 100vh;
+  margin: auto 0;
+  color: #d1f0fa;
+  animation: shake 0.5s;
+}
+
+.page > img {
+  animation: rotateStep 2s linear infinite;
+}
+
+@keyframes rotateStep {
+  0%,
+  33% {
+    transform: rotate(0deg);
+  }
+  33%,
+  66% {
+    transform: rotate(360deg);
+  }
+  66%,
+  100% {
+    transform: rotate(360deg);
+  }
+}

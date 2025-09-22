@@ -1,0 +1,67 @@
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  height: 3rem;
+  background-color: #000c17;
+  padding: 0 20px;
+  border-top: 1px solid #ededed;
+  transition: all 0.3s ease;
+}
+
+.footer-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.footer-link {
+  color: #1890ff !important;
+  transition: color 0.3s ease;
+}
+
+.footer-link:hover {
+  color: #40a9ff !important;
+}
+
+.yearText {
+  color: rgba(255, 255, 255, 0.85) !important;
+  margin: 0;
+}
+
+.footerText {
+  color: rgba(255, 255, 255, 0.65) !important;
+  margin: 0;
+}
+
+.link-container {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.rss-logo {
+  opacity: 0.8;
+  transition: opacity 0.3s ease;
+}
+
+.rss-logo:hover {
+  opacity: 1;
+}
+
+@media (max-width: 768px) {
+  .footer {
+    height: auto;
+    padding: 15px;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .footer-content {
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+  }
+}

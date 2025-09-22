@@ -1,0 +1,71 @@
+.section {
+  display: flex;
+  width: 80vw;
+  margin: 0 auto;
+}
+
+.card {
+  width: 100%;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  padding: 24px;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.title {
+  display: flex;
+  width: fit-content;
+  margin: 0 auto 10px auto;
+  color: #1890ff !important;
+}
+
+.add-section {
+  margin-bottom: 30px;
+}
+
+.input-group {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.name-input,
+.value-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.add-button {
+  width: 120px;
+  flex-shrink: 0;
+  align-self: flex-start;
+}
+
+.list-section {
+  margin-top: 20px;
+}
+
+.error-text {
+  color: #ff4d4f;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+@media (width <= 768px) {
+  .section {
+    width: 95vw;
+  }
+
+  .input-group {
+    gap: 12px;
+  }
+
+  .add-button {
+    width: 100%;
+    align-self: stretch;
+  }
+}

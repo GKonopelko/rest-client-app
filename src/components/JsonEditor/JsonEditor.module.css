@@ -1,0 +1,41 @@
+.json-editor {
+  width: 100%;
+}
+
+.toolbar {
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+}
+
+.language-select {
+  width: 120px;
+}
+
+.format-button {
+  margin-left: 8px;
+}
+
+.editor-loading {
+  height: 200px;
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
+  padding: 8px;
+  background-color: #fafafa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+}
+
+.editor-loading :global(.monaco-editor) {
+  overflow: auto;
+}
+
+.editor-loading :global(.monaco-scrollable-element) {
+  overflow: auto !important;
+}
+
+.editor-loading :global(.monaco-editor .scrollbar) {
+  visibility: visible !important;
+}
