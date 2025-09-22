@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback, memo } from 'react';
 import { Card, Typography, message } from 'antd';
-import { useLocale, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import styles from './RestClient.module.css';
 
 import RequestPanel from './components/RequestPanel/RequestPanel';
@@ -38,7 +38,6 @@ const RestClientPage = memo(
     initialBody = '',
     initialHeaders = {},
   }: RestClientPageProps) => {
-    const locale = useLocale();
     const [isMounted, setIsMounted] = useState(false);
     const [isLocaleChanging, setIsLocaleChanging] = useState(false);
     const [request, setRequest] = useState<RequestData>({
@@ -127,12 +126,6 @@ const RestClientPage = memo(
     }, [request, isMounted]);
 
     useEffect(() => {
-      if (isMounted && !isLocaleChanging) {
-        updateUrl(request);
-      }
-    }, [request, updateUrl, isMounted, locale, isLocaleChanging]);
-
-    useEffect(() => {
       setRequest((prev) => ({
         ...prev,
         headers: headersArrayToObject(headers),
@@ -156,11 +149,14 @@ const RestClientPage = memo(
         setTimeout(() => {
           execute({ ...request, url: requestUrl }).then(handleResult);
         }, 100);
-        return;
+      } else {
+        execute(request).then(handleResult);
       }
 
-      execute(request).then(handleResult);
-    }, [request, execute, t, handleResult]);
+      if (!isLocaleChanging) {
+        updateUrl({ ...request, url: requestUrl });
+      }
+    }, [request, execute, t, handleResult, updateUrl, isLocaleChanging]);
 
     const updateRequest = useCallback((updates: Partial<RequestData>) => {
       setRequest((prev) => ({ ...prev, ...updates }));
